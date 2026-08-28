@@ -1,0 +1,137 @@
+@import '../../app.scss';
+
+.profile {
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, $sky, $teal);
+  border-radius: 24px;
+  padding: 40px 32px;
+}
+
+.avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.user-info {
+  margin-left: 28px;
+}
+
+.nickname {
+  display: block;
+  font-size: 36px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bio {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.section {
+  margin-top: 32px;
+}
+
+.section-title {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.empty {
+  background: #fff;
+  border-radius: 24px;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 26px;
+  color: $sub;
+}
+
+.trip-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px 32px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(31, 45, 61, 0.06);
+}
+
+.trip-info {
+  flex: 1;
+}
+
+.trip-title {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.trip-meta {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: $sub;
+}
+
+.trip-arrow {
+  font-size: 40px;
+  color: $sub;
+}
+
+.menu {
+  margin-top: 32px;
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32px;
+  border-bottom: 1px solid $bg;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  font-size: 36px;
+}
+
+.menu-label {
+  flex: 1;
+  margin-left: 20px;
+  font-size: 30px;
+}
+
+.menu-arrow {
+  font-size: 36px;
+  color: $sub;
+}
+
+.footer {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 22px;
+  color: $sub;
+}

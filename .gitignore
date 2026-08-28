@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.temp/
+.rn_temp/
+.swc/
+project.private.config.json
+src/config.local.ts

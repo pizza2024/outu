@@ -1,0 +1,312 @@
+@import '../../app.scss';
+
+.q {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 进度条 ===== */
+.progress-wrap {
+  padding: 24px 32px 8px;
+  background: #fff;
+}
+
+.progress-track {
+  height: 12px;
+  background: $bg;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $sky, $teal);
+  border-radius: 8px;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  display: block;
+  margin-top: 12px;
+  font-size: 22px;
+  color: $sub;
+}
+
+/* ===== 内容区 ===== */
+.body {
+  flex: 1;
+  padding: 36px 32px 24px;
+}
+
+.title {
+  display: block;
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.hint {
+  display: block;
+  font-size: 24px;
+  color: $sub;
+  margin-bottom: 24px;
+}
+
+/* ===== 输入 ===== */
+.input-row {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+
+.text-input {
+  flex: 1;
+  height: 96px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 0 28px;
+  font-size: 30px;
+  box-shadow: 0 2px 10px rgba(31, 45, 61, 0.05);
+}
+
+.input-ph {
+  color: $sub;
+}
+
+.add-btn {
+  margin-left: 16px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, $sky, $teal);
+  border-radius: 20px;
+  padding: 0 36px;
+}
+
+.add-btn-text {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+/* ===== 选择 chips ===== */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chip {
+  background: #fff;
+  border: 2px solid #E4EBEF;
+  border-radius: 36px;
+  padding: 16px 32px;
+  margin: 0 16px 16px 0;
+}
+
+.chip-on {
+  background: linear-gradient(135deg, $sky, $teal);
+  border-color: transparent;
+}
+
+.chip-text {
+  font-size: 26px;
+  color: $text;
+}
+
+.chip-text-on {
+  color: #fff;
+}
+
+/* ===== 日期选择 ===== */
+.picker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.picker-label {
+  font-size: 30px;
+}
+
+.picker-value {
+  font-size: 30px;
+  color: $teal;
+  font-weight: 600;
+}
+
+.days-card {
+  background: rgba(255, 140, 102, 0.1);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-top: 8px;
+}
+
+.days-text {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+  color: $coral;
+}
+
+.days-sub {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: $sub;
+}
+
+/* ===== 计数器 ===== */
+.counter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.counter-label {
+  font-size: 30px;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+}
+
+.counter-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: $bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counter-sign {
+  font-size: 36px;
+  color: $teal;
+}
+
+.counter-num {
+  width: 80px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+/* ===== 节奏卡片 ===== */
+.pace-card {
+  background: #fff;
+  border: 2px solid #E4EBEF;
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+}
+
+.pace-on {
+  border-color: $teal;
+  background: rgba(25, 181, 166, 0.06);
+}
+
+.pace-label {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.pace-label-on {
+  color: $teal;
+}
+
+.pace-desc {
+  display: block;
+  margin-top: 6px;
+  font-size: 24px;
+  color: $sub;
+}
+
+/* ===== 文本域 ===== */
+.textarea {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 28px;
+  width: 100%;
+  height: 240px;
+  font-size: 28px;
+  box-shadow: 0 2px 10px rgba(31, 45, 61, 0.05);
+}
+
+/* ===== 确认页 ===== */
+.confirm-row {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px 28px;
+  margin-bottom: 16px;
+}
+
+.confirm-label {
+  width: 140px;
+  font-size: 26px;
+  color: $sub;
+}
+
+.confirm-value {
+  flex: 1;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.confirm-edit {
+  font-size: 24px;
+  color: $teal;
+}
+
+/* ===== 底部按钮 ===== */
+.footer {
+  display: flex;
+  padding: 20px 32px calc(20px + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(31, 45, 61, 0.05);
+}
+
+.btn-ghost {
+  flex: 1;
+  border: 2px solid #E4EBEF;
+  border-radius: 44px;
+  padding: 22px 0;
+  text-align: center;
+  margin-right: 20px;
+}
+
+.btn-ghost-text {
+  font-size: 30px;
+  color: $sub;
+}
+
+.btn-primary {
+  flex: 2;
+  background: linear-gradient(135deg, $sky, $teal);
+  border-radius: 44px;
+  padding: 22px 0;
+  text-align: center;
+}
+
+.btn-go {
+  flex: 1;
+  background: linear-gradient(135deg, $coral, #F0934F);
+}
+
+.btn-primary-text {
+  font-size: 30px;
+  font-weight: 600;
+  color: #fff;
+}

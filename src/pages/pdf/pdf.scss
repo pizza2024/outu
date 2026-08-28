@@ -1,0 +1,333 @@
+@import '../../app.scss';
+
+.pdf-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #E8F0F3;
+}
+
+.pdf-empty {
+  padding: 200px 0;
+  text-align: center;
+}
+
+.pdf-empty-text {
+  color: $sub;
+  font-size: 28px;
+}
+
+.sheet-wrap {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+.sheet {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(31, 45, 61, 0.1);
+}
+
+/* ===== 1 封面 ===== */
+.cover {
+  background: linear-gradient(165deg, $sky, $teal);
+  padding: 64px 40px 56px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.cover-logo {
+  width: 110px;
+  height: 110px;
+  border-radius: 26px;
+}
+
+.cover-title {
+  margin-top: 28px;
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.cover-meta {
+  margin-top: 14px;
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cover-tags {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cover-tag {
+  font-size: 22px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  padding: 6px 20px;
+  margin: 0 8px 8px 0;
+}
+
+/* ===== 章节 ===== */
+.sec {
+  padding: 36px 36px 8px;
+}
+
+.sec-title {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  padding-left: 18px;
+  border-left: 8px solid $teal;
+}
+
+/* 总览 */
+.ov-card {
+  background: $bg;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.ov-day {
+  font-size: 24px;
+  color: $teal;
+  font-weight: 600;
+}
+
+.ov-theme {
+  display: block;
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.ov-hl {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: $sub;
+}
+
+/* 每日 */
+.day-block {
+  margin-bottom: 28px;
+}
+
+.day-block-title {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: $teal;
+  margin-bottom: 16px;
+}
+
+.sch-row {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.sch-time {
+  width: 90px;
+  font-size: 24px;
+  color: $sub;
+  font-weight: 600;
+}
+
+.sch-info {
+  flex: 1;
+}
+
+.sch-title {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.sch-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 24px;
+  color: $sub;
+  line-height: 1.5;
+}
+
+.sch-cost {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: $coral;
+}
+
+/* 交通 */
+.trans-card {
+  background: $bg;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.trans-leg {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.trans-item {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+  color: $sub;
+}
+
+.local-tips {
+  display: block;
+  font-size: 24px;
+  color: $text;
+  margin-bottom: 16px;
+}
+
+/* 住宿 */
+.hotel-card {
+  background: $bg;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.hotel-name {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.hotel-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 24px;
+  color: $sub;
+}
+
+.hotel-reason {
+  display: block;
+  margin-top: 6px;
+  font-size: 24px;
+  color: $text;
+}
+
+/* 费用 */
+.budget-table {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: $bg;
+}
+
+.budget-total {
+  background: rgba(255, 140, 102, 0.12);
+}
+
+.budget-label {
+  font-size: 26px;
+}
+
+.budget-val {
+  font-size: 26px;
+  font-weight: 600;
+  color: $coral;
+}
+
+/* 实用信息 */
+.prac-text {
+  display: block;
+  font-size: 24px;
+  color: $text;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+/* ===== 尾页 ===== */
+.tail {
+  margin-top: 24px;
+  background: linear-gradient(165deg, $sky, $teal);
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tail-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
+}
+
+.tail-text {
+  margin-top: 20px;
+  font-size: 26px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tail-sub {
+  margin-top: 8px;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ===== 操作栏 ===== */
+.pdf-actions {
+  display: flex;
+  padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(31, 45, 61, 0.05);
+}
+
+.pact {
+  flex: 1;
+  background: $bg;
+  border-radius: 40px;
+  padding: 20px 0;
+  text-align: center;
+  margin-right: 16px;
+}
+
+.pact:last-child {
+  margin-right: 0;
+}
+
+.pact-primary {
+  background: linear-gradient(135deg, $sky, $teal);
+}
+
+.pact-text {
+  font-size: 28px;
+  color: $text;
+}
+
+.pact-text-light {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ===== 离屏长图画布 ===== */
+.poster-canvas {
+  position: fixed;
+  left: -1999px;
+  top: 0;
+  width: 750px;
+  height: 2000px;
+}

@@ -1,0 +1,18 @@
+/* ===== 鸥途主题 ===== */
+$sky: #3E9BF0;
+$teal: #19B5A6;
+$coral: #FF8C66;
+$bg: #F5FAFB;
+$text: #1F2D3D;
+$sub: #8A9BA8;
+
+page {
+  background: $bg;
+  color: $text;
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 28px;
+}
+
+view, text, input, button {
+  box-sizing: border-box;
+}

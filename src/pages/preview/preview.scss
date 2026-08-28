@@ -1,0 +1,286 @@
+@import '../../app.scss';
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.empty {
+  padding: 200px 0;
+  text-align: center;
+}
+
+.empty-text {
+  color: $sub;
+  font-size: 28px;
+}
+
+/* ===== 方案头 ===== */
+.plan-head {
+  background: linear-gradient(160deg, $sky, $teal);
+  padding: 32px;
+}
+
+.plan-title {
+  display: block;
+  font-size: 38px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.plan-meta {
+  display: block;
+  margin-top: 10px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ===== 每日 Tab ===== */
+.day-tabs {
+  white-space: nowrap;
+  background: #fff;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(31, 45, 61, 0.04);
+}
+
+.day-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 28px;
+  margin-right: 16px;
+  border-radius: 20px;
+  background: $bg;
+}
+
+.day-tab-on {
+  background: linear-gradient(135deg, $sky, $teal);
+}
+
+.day-tab-text {
+  font-size: 28px;
+  font-weight: 600;
+  color: $text;
+}
+
+.day-tab-date {
+  font-size: 20px;
+  color: $sub;
+  margin-top: 2px;
+}
+
+.day-tab-text-on {
+  color: #fff;
+}
+
+/* ===== 时间轴 ===== */
+.timeline {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+.day-theme {
+  display: block;
+  font-size: 26px;
+  color: $sub;
+  margin-bottom: 24px;
+}
+
+.node {
+  display: flex;
+}
+
+.node-time {
+  width: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.node-start {
+  font-size: 26px;
+  font-weight: 600;
+  color: $teal;
+}
+
+.node-line {
+  flex: 1;
+  width: 4px;
+  background: #D9E8EE;
+  border-radius: 2px;
+  margin: 8px 0;
+}
+
+.node-card {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  margin-left: 16px;
+  box-shadow: 0 2px 10px rgba(31, 45, 61, 0.05);
+}
+
+.node-head {
+  display: flex;
+  align-items: center;
+}
+
+.node-icon {
+  font-size: 32px;
+}
+
+.node-title {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+  font-size: 30px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-cost {
+  font-size: 26px;
+  color: $coral;
+  font-weight: 600;
+}
+
+.node-detail {
+  margin-top: 16px;
+  border-top: 1px solid $bg;
+  padding-top: 16px;
+}
+
+.node-desc {
+  display: block;
+  font-size: 26px;
+  color: $text;
+  line-height: 1.6;
+}
+
+.node-sub {
+  display: block;
+  margin-top: 10px;
+  font-size: 24px;
+  color: $sub;
+}
+
+.node-tips {
+  display: block;
+  margin-top: 10px;
+  font-size: 24px;
+  color: #B7791F;
+}
+
+.node-tools {
+  margin-top: 16px;
+  border-top: 1px solid $bg;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.tool {
+  font-size: 26px;
+  color: $teal;
+}
+
+.tool-danger {
+  color: #E05252;
+}
+
+/* ===== 添加节点 ===== */
+.add-area {
+  margin-left: 106px;
+  margin-bottom: 20px;
+}
+
+.add-trigger {
+  border: 2px dashed #C7D8E0;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.add-trigger-text {
+  font-size: 26px;
+  color: $sub;
+}
+
+.add-form {
+  display: flex;
+  align-items: center;
+}
+
+.add-input {
+  flex: 1;
+  height: 88px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 0 24px;
+  font-size: 28px;
+}
+
+.add-ph {
+  color: $sub;
+}
+
+.add-ok {
+  margin-left: 16px;
+  background: $teal;
+  border-radius: 20px;
+  padding: 20px 32px;
+}
+
+.add-ok-text {
+  color: #fff;
+  font-size: 28px;
+}
+
+/* ===== 底部操作栏 ===== */
+.actions {
+  display: flex;
+  padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(31, 45, 61, 0.05);
+}
+
+.act {
+  flex: 1;
+  border-radius: 40px;
+  padding: 20px 0;
+  text-align: center;
+  margin-right: 16px;
+  background: $bg;
+}
+
+.act:last-child {
+  margin-right: 0;
+}
+
+.act-on {
+  background: rgba(25, 181, 166, 0.12);
+}
+
+.act-primary {
+  background: linear-gradient(135deg, $sky, $teal);
+}
+
+.act-text {
+  font-size: 28px;
+  color: $text;
+}
+
+.act-text-on {
+  color: $teal;
+  font-weight: 600;
+}
+
+.act-text-light {
+  color: #fff;
+  font-weight: 600;
+}

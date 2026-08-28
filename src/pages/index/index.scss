@@ -1,0 +1,187 @@
+@import '../../app.scss';
+
+.page {
+  min-height: 100vh;
+}
+
+/* ===== 头部 ===== */
+.header {
+  background: linear-gradient(160deg, $sky, $teal);
+  padding: 32px 32px 36px;
+  border-radius: 0 0 36px 36px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  margin-right: 16px;
+}
+
+.brand-name {
+  font-size: 40px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  height: 88px;
+  background: #fff;
+  border-radius: 44px;
+  padding: 0 28px;
+}
+
+.search-icon {
+  font-size: 28px;
+  margin-right: 12px;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28px;
+}
+
+.search-placeholder {
+  color: $sub;
+}
+
+/* ===== 横幅 ===== */
+.banner {
+  margin: 28px 32px 0;
+  background: linear-gradient(135deg, $coral, #F0934F);
+  border-radius: 24px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 20px rgba(255, 140, 102, 0.3);
+}
+
+.banner-title {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.banner-sub {
+  display: block;
+  margin-top: 12px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ===== 模板网格 ===== */
+.section {
+  padding: 32px 32px 0;
+}
+
+.section-title {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.tpl-card {
+  width: 48.5%;
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(31, 45, 61, 0.06);
+}
+
+.tpl-cover {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tpl-emoji {
+  font-size: 72px;
+}
+
+.tpl-body {
+  padding: 20px 24px 24px;
+}
+
+.tpl-name {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.tpl-desc {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: $sub;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tpl-meta {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.tpl-days {
+  font-size: 22px;
+  color: $teal;
+  background: rgba(25, 181, 166, 0.1);
+  border-radius: 14px;
+  padding: 4px 14px;
+}
+
+.tpl-audience {
+  margin-left: 12px;
+  font-size: 22px;
+  color: $sub;
+}
+
+/* ===== 最近行程 ===== */
+.recent-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px 32px;
+  box-shadow: 0 4px 16px rgba(31, 45, 61, 0.06);
+}
+
+.recent-info {
+  flex: 1;
+}
+
+.recent-title {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.recent-date {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: $sub;
+}
+
+.recent-arrow {
+  font-size: 40px;
+  color: $sub;
+}

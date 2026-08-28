@@ -1,0 +1,96 @@
+@import '../../app.scss';
+
+.launch {
+  min-height: 100vh;
+  background: linear-gradient(165deg, $sky 0%, $teal 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 48px 80px;
+}
+
+.brand {
+  margin-top: 30vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 160px;
+  height: 160px;
+  border-radius: 36px;
+}
+
+.name {
+  margin-top: 24px;
+  font-size: 52px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 4px;
+}
+
+.slogan {
+  margin-top: 16px;
+  font-size: 30px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.sub {
+  margin-top: 12px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-btn {
+  width: 100%;
+  background: #fff;
+  border-radius: 48px;
+  padding: 26px 0;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(31, 45, 61, 0.18);
+}
+
+.login-text {
+  font-size: 32px;
+  font-weight: 600;
+  color: $teal;
+}
+
+.privacy {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox.checked {
+  background: #fff;
+  border-color: #fff;
+}
+
+.check-mark {
+  font-size: 22px;
+  color: $teal;
+}
+
+.privacy-text {
+  margin-left: 12px;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.85);
+}
