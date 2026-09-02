@@ -1,8 +1,9 @@
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useEffect, useState } from 'react'
-import { API_TOKEN, CLOUD_ENV, CLOUD_SERVICE, IS_DEV, LOCAL_API_BASE } from '../../config'
+import { IS_DEV } from '../../config'
 import { getUser, mockPlan, pushHistory, savePlan } from '../../store/plan'
+import { apiPost } from '../../utils/api'
 import { TravelPlan, TravelRequest } from '../../types'
 import './generating.scss'
 
@@ -14,6 +15,12 @@ const TIPS = [
   '正在匹配交通与住宿方案…',
   '正在核算整体预算…'
 ]
+
+/** 轮询间隔与上限：AI 生成约 1~4 分钟，放宽到 5 分钟 */
+const POLL_INTERVAL = 4000
+const POLL_MAX = 75
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export default function Generating() {
   const [tipIdx, setTipIdx] = useState(0)
@@ -34,54 +41,51 @@ export default function Generating() {
     request.user_id = getUser()?.openid || 'guest'
 
     let plan: TravelPlan | null = null
-    let cloudError = ''
+    let failReason = ''
     try {
-      if (IS_DEV) {
-        // 本地开发：直接请求本机 NestJS 服务（需在开发者工具勾选「不校验合法域名」）
-        const res = await Taro.request({
-          url: `${LOCAL_API_BASE}/api/plan/generate`,
-          method: 'POST',
-          timeout: 290000,
-          header: { 'x-outu-token': API_TOKEN, 'content-type': 'application/json' },
-          data: { request }
-        })
-        const result = res.data as { plan?: TravelPlan; error?: string }
-        plan = result?.plan || null
-        if (!plan) cloudError = result?.error || `后端返回异常（HTTP ${res.statusCode}）`
+      // 1) 提交异步生成任务（立即返回 job_id，不会被网关超时掐断）
+      const submit = await apiPost<{ job_id: string | null; error?: string }>(
+        '/api/plan/generate',
+        { request }
+      )
+      if (!submit?.job_id) {
+        failReason = submit?.error || '任务创建失败'
       } else {
-        // 线上：云托管内网调用（callContainer 免域名白名单，无 60s 限制）
-        const res = await Taro.cloud.callContainer({
-          config: { env: CLOUD_ENV },
-          path: '/api/plan/generate',
-          method: 'POST',
-          header: {
-            'X-WX-SERVICE': CLOUD_SERVICE,
-            'x-outu-token': API_TOKEN,
-            'content-type': 'application/json'
-          },
-          data: { request }
-        })
-        const result = res.data as { plan?: TravelPlan; error?: string }
-        plan = result?.plan || null
-        if (!plan) cloudError = result?.error || `后端返回异常（HTTP ${res.statusCode}）`
+        // 2) 轮询结果
+        for (let i = 0; i < POLL_MAX; i++) {
+          await sleep(POLL_INTERVAL)
+          const r = await apiPost<{ status: string; plan?: TravelPlan; error?: string }>(
+            '/api/plan/result',
+            { job_id: submit.job_id }
+          )
+          if (r?.status === 'done' && r.plan) {
+            plan = r.plan
+            break
+          }
+          if (r?.status === 'error') {
+            failReason = r.error || '生成失败'
+            break
+          }
+        }
+        if (!plan && !failReason) failReason = '生成超时，请重试'
       }
     } catch (e: any) {
-      plan = null
-      cloudError = e?.errMsg || e?.message || String(e)
+      failReason = e?.errMsg || e?.message || String(e)
     }
+
     // 降级：本地示例方案
     if (!plan) {
-      console.warn('[鸥途] 后端调用失败，降级为本地示例方案：', cloudError)
+      console.warn('[鸥途] 后端生成失败，降级为本地示例方案：', failReason)
       // 开发模式下把失败原因弹出来，方便排查（线上保持静默降级）
       if (IS_DEV) {
         Taro.showModal({
           title: '后端调用失败（调试）',
-          content: cloudError || '未知错误',
+          content: failReason || '未知错误',
           showCancel: false,
           confirmText: '知道了'
         })
       }
-      await new Promise((r) => setTimeout(r, 2500))
+      await sleep(2000)
       plan = mockPlan(request)
     }
 
@@ -98,7 +102,7 @@ export default function Generating() {
       <View className='gen-bar'>
         <View className='gen-bar-fill' />
       </View>
-      <Text className='gen-note'>AI 正在深度规划，约需 1-2 分钟，请稍候</Text>
+      <Text className='gen-note'>AI 正在深度规划，约需 1-3 分钟，请稍候</Text>
     </View>
   )
 }
