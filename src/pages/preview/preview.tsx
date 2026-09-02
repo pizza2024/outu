@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Input } from '@tarojs/components'
+import { View, Text, ScrollView, Input, Button } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { useState } from 'react'
 import { getPlan, recalcBudget, savePlan } from '../../store/plan'
@@ -12,7 +12,7 @@ const ACT_ICON: Record<string, string> = {
 
 export default function Preview() {
   const [plan, setPlan] = useState<TravelPlan | null>(null)
-  const [day, setDay] = useState(0)
+  const [openDay, setOpenDay] = useState(0)
   const [expanded, setExpanded] = useState(-1)
   const [editing, setEditing] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -35,29 +35,27 @@ export default function Preview() {
     )
   }
 
-  const current = plan.daily_plans[day] || plan.daily_plans[0]
-
   const update = (next: TravelPlan) => {
     recalcBudget(next)
     setPlan({ ...next })
     savePlan(next)
   }
 
-  const move = (idx: number, dir: -1 | 1) => {
-    const arr = [...current.schedule]
+  const move = (dayIdx: number, idx: number, dir: -1 | 1) => {
+    const arr = [...plan.daily_plans[dayIdx].schedule]
     const target = idx + dir
     if (target < 0 || target >= arr.length) return
     ;[arr[idx], arr[target]] = [arr[target], arr[idx]]
-    current.schedule = arr
+    plan.daily_plans[dayIdx].schedule = arr
     update(plan)
   }
 
-  const remove = (idx: number) => {
-    current.schedule = current.schedule.filter((_, i) => i !== idx)
+  const remove = (dayIdx: number, idx: number) => {
+    plan.daily_plans[dayIdx].schedule = plan.daily_plans[dayIdx].schedule.filter((_, i) => i !== idx)
     update(plan)
   }
 
-  const addNode = () => {
+  const addNode = (dayIdx: number) => {
     const title = newTitle.trim()
     if (!title) return
     const node: ScheduleItem = {
@@ -68,103 +66,146 @@ export default function Preview() {
       booking_info: { provider: '', deep_link: '', booking_type: 'none' },
       tips: '', image_url: ''
     }
-    current.schedule = [...current.schedule, node]
+    plan.daily_plans[dayIdx].schedule = [...plan.daily_plans[dayIdx].schedule, node]
     setNewTitle('')
     setAdding(false)
     update(plan)
   }
 
+  const perPerson = plan.budget_breakdown.total_estimated
+
   return (
     <View className='preview'>
-      {/* 方案头 */}
-      <View className='plan-head'>
-        <Text className='plan-title'>{plan.summary.title}</Text>
-        <Text className='plan-meta'>
-          {plan.summary.duration_label} · 预算约 ¥{plan.budget_breakdown.total_estimated}
-        </Text>
-      </View>
-
-      {/* 每日 Tab */}
-      <ScrollView className='day-tabs' scrollX>
-        {plan.daily_plans.map((d, i) => (
-          <View key={d.day} className={`day-tab ${i === day ? 'day-tab-on' : ''}`} onClick={() => { setDay(i); setExpanded(-1) }}>
-            <Text className={`day-tab-text ${i === day ? 'day-tab-text-on' : ''}`}>D{d.day}</Text>
-            <Text className={`day-tab-date ${i === day ? 'day-tab-text-on' : ''}`}>{d.date.slice(5)}</Text>
+      <ScrollView className='preview-scroll' scrollY>
+        {/* 成功头 */}
+        <View className='done-head'>
+          <Text className='done-title'>你的专属行程已生成 🎉</Text>
+          <View className='done-meta'>
+            <Text className='done-route'>{plan.summary.duration_label} · {plan.summary.destination_label}之旅</Text>
+            <Text className='done-budget'>人均预算 ¥{perPerson.toLocaleString()}</Text>
           </View>
-        ))}
-      </ScrollView>
-
-      {/* 时间轴 */}
-      <ScrollView className='timeline' scrollY>
-        <Text className='day-theme'>{current.theme} · {current.highlights.join(' / ')}</Text>
-        {current.schedule.map((s, i) => (
-          <View key={i} className='node'>
-            <View className='node-time'>
-              <Text className='node-start'>{s.start_time}</Text>
-              <View className='node-line' />
+          {plan.summary.theme_tags.length > 0 && (
+            <View className='done-tags'>
+              {plan.summary.theme_tags.slice(0, 4).map((t) => (
+                <Text key={t} className='done-tag'>{t}</Text>
+              ))}
             </View>
-            <View className='node-card' onClick={() => !editing && setExpanded(expanded === i ? -1 : i)}>
-              <View className='node-head'>
-                <Text className='node-icon'>{ACT_ICON[s.activity_type] || '📌'}</Text>
-                <Text className='node-title'>{s.title}</Text>
-                {s.estimated_cost.amount > 0 && (
-                  <Text className='node-cost'>¥{s.estimated_cost.amount}</Text>
-                )}
+          )}
+        </View>
+
+        {/* 路线概览卡（地图占位） */}
+        <View className='map-card'>
+          <View className='map-route'>
+            {plan.daily_plans.slice(0, 4).map((d, i) => (
+              <View key={d.day} className='map-stop'>
+                <View className={`map-dot ${i === 0 ? 'map-dot-start' : ''}`}>
+                  <Text className='map-dot-num'>{d.day}</Text>
+                </View>
+                <Text className='map-stop-name'>{d.highlights[0] || d.theme}</Text>
+                {i < Math.min(plan.daily_plans.length, 4) - 1 && <View className='map-line' />}
               </View>
-              {expanded === i && (
-                <View className='node-detail'>
-                  <Text className='node-desc'>{s.description}</Text>
-                  {!!s.location.address && <Text className='node-sub'>📍 {s.location.address}</Text>}
-                  {!!s.tips && <Text className='node-tips'>💡 {s.tips}</Text>}
+            ))}
+          </View>
+          <Text className='map-hint'>🗺️ {plan.summary.destination_label} · 路线概览</Text>
+        </View>
+
+        {/* 每日行程卡 */}
+        {plan.daily_plans.map((d, dayIdx) => {
+          const open = openDay === dayIdx
+          const firstSpot = d.schedule.find((s) => s.activity_type === 'sightseeing')
+          return (
+            <View key={d.day} className='day-card'>
+              <View className='day-head' onClick={() => { setOpenDay(open ? -1 : dayIdx); setExpanded(-1) }}>
+                <View className='day-head-main'>
+                  <View className='day-badge'><Text className='day-badge-text'>DAY {d.day}</Text></View>
+                  <Text className='day-theme'>{d.theme}</Text>
+                  <Text className='day-spots'>{d.highlights.join(' → ')}</Text>
+                  <Text className='day-date'>{d.date}</Text>
+                </View>
+                <View className='day-thumb'>
+                  <Text className='day-thumb-emoji'>{ACT_ICON[firstSpot?.activity_type || 'sightseeing']}</Text>
+                </View>
+              </View>
+
+              {open && (
+                <View className='day-detail'>
+                  {d.schedule.map((s, i) => (
+                    <View key={i} className='node'>
+                      <View className='node-time'>
+                        <Text className='node-start'>{s.start_time}</Text>
+                        <View className='node-line' />
+                      </View>
+                      <View className='node-card' onClick={() => !editing && setExpanded(expanded === i ? -1 : i)}>
+                        <View className='node-head'>
+                          <Text className='node-icon'>{ACT_ICON[s.activity_type] || '📌'}</Text>
+                          <Text className='node-title'>{s.title}</Text>
+                          {s.estimated_cost.amount > 0 && (
+                            <Text className='node-cost'>¥{s.estimated_cost.amount}</Text>
+                          )}
+                        </View>
+                        {expanded === i && (
+                          <View className='node-detail'>
+                            <Text className='node-desc'>{s.description}</Text>
+                            {!!s.location.address && <Text className='node-sub'>📍 {s.location.address}</Text>}
+                            {!!s.tips && <Text className='node-tips'>💡 {s.tips}</Text>}
+                          </View>
+                        )}
+                        {editing && (
+                          <View className='node-tools'>
+                            <Text className='tool' onClick={() => move(dayIdx, i, -1)}>↑ 上移</Text>
+                            <Text className='tool' onClick={() => move(dayIdx, i, 1)}>↓ 下移</Text>
+                            <Text className='tool tool-danger' onClick={() => remove(dayIdx, i)}>✕ 删除</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+
+                  {editing && (
+                    <View className='add-area'>
+                      {adding ? (
+                        <View className='add-form'>
+                          <Input
+                            className='add-input'
+                            placeholder='输入自定义行程，如：傍晚去夜市'
+                            placeholderClass='add-ph'
+                            value={newTitle}
+                            onInput={(e) => setNewTitle(e.detail.value)}
+                          />
+                          <View className='add-ok' onClick={() => addNode(dayIdx)}>
+                            <Text className='add-ok-text'>添加</Text>
+                          </View>
+                        </View>
+                      ) : (
+                        <View className='add-trigger' onClick={() => setAdding(true)}>
+                          <Text className='add-trigger-text'>＋ 添加自定义节点</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </View>
               )}
-              {editing && (
-                <View className='node-tools'>
-                  <Text className='tool' onClick={() => move(i, -1)}>↑ 上移</Text>
-                  <Text className='tool' onClick={() => move(i, 1)}>↓ 下移</Text>
-                  <Text className='tool tool-danger' onClick={() => remove(i)}>✕ 删除</Text>
-                </View>
-              )}
             </View>
-          </View>
-        ))}
+          )
+        })}
 
-        {editing && (
-          <View className='add-area'>
-            {adding ? (
-              <View className='add-form'>
-                <Input
-                  className='add-input'
-                  placeholder='输入自定义行程，如：傍晚去夜市'
-                  placeholderClass='add-ph'
-                  value={newTitle}
-                  onInput={(e) => setNewTitle(e.detail.value)}
-                />
-                <View className='add-ok' onClick={addNode}>
-                  <Text className='add-ok-text'>添加</Text>
-                </View>
-              </View>
-            ) : (
-              <View className='add-trigger' onClick={() => setAdding(true)}>
-                <Text className='add-trigger-text'>＋ 添加自定义节点</Text>
-              </View>
-            )}
-          </View>
-        )}
-        <View style={{ height: '160px' }} />
+        <View style={{ height: '200px' }} />
       </ScrollView>
 
       {/* 底部操作栏 */}
       <View className='actions'>
-        <View className={`act ${editing ? 'act-on' : ''}`} onClick={() => setEditing(!editing)}>
-          <Text className={`act-text ${editing ? 'act-text-on' : ''}`}>{editing ? '完成' : '微调'}</Text>
+        <View className='actions-row'>
+          <View className={`act ${editing ? 'act-on' : ''}`} onClick={() => setEditing(!editing)}>
+            <Text className={`act-text ${editing ? 'act-text-on' : ''}`}>{editing ? '✓ 完成' : '✏️ 微调'}</Text>
+          </View>
+          <View className='act act-primary' onClick={() => Taro.showToast({ title: '已保存到行程', icon: 'success' })}>
+            <Text className='act-text act-text-light'>💾 保存行程</Text>
+          </View>
+          <View className='act' onClick={() => Taro.navigateTo({ url: '/pages/pdf/pdf' })}>
+            <Text className='act-text'>📄 长图</Text>
+          </View>
         </View>
-        <View className='act act-primary' onClick={() => Taro.navigateTo({ url: '/pages/pdf/pdf' })}>
-          <Text className='act-text act-text-light'>生成PDF</Text>
-        </View>
-        <View className='act' onClick={() => Taro.showToast({ title: '点右上角「···」分享', icon: 'none' })}>
-          <Text className='act-text'>分享</Text>
-        </View>
+        <Button className='share-btn' openType='share' hoverClass='share-btn-hover'>分享给伙伴 ›</Button>
       </View>
     </View>
   )

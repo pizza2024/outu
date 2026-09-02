@@ -2,136 +2,155 @@
 
 .profile {
   min-height: 100vh;
+  background: $bg;
   padding: 32px;
 }
 
+/* 用户卡片 */
 .user-card {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, $sky, $teal);
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
   border-radius: 24px;
-  padding: 40px 32px;
+  box-shadow: 0 16px 36px rgba(46, 124, 246, 0.28);
+  padding: 40px 36px;
+}
+
+.avatar-wrap {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0;
+  line-height: 1;
+
+  &::after { border: none; }
 }
 
 .avatar {
-  width: 112px;
-  height: 112px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  width: 120px;
+  height: 120px;
 }
 
 .user-info {
+  flex: 1;
   margin-left: 28px;
+  min-width: 0;
 }
 
 .nickname {
   display: block;
-  font-size: 36px;
+  height: 56px;
+  font-size: 38px;
   font-weight: 700;
   color: #fff;
 }
 
+.nickname-ph {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 32px;
+}
+
 .bio {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 24px;
   color: rgba(255, 255, 255, 0.85);
 }
 
-.section {
-  margin-top: 32px;
-}
-
-.section-title {
-  display: block;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.empty {
-  background: #fff;
-  border-radius: 24px;
-  padding: 60px 0;
-  text-align: center;
-}
-
-.empty-text {
-  font-size: 26px;
-  color: $sub;
-}
-
-.trip-card {
+/* 数据概览 */
+.stats-card {
+  margin-top: 24px;
   display: flex;
   align-items: center;
   background: #fff;
   border-radius: 24px;
-  padding: 28px 32px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 16px rgba(31, 45, 61, 0.06);
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  padding: 32px 0;
 }
 
-.trip-info {
+.stat {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.trip-title {
-  display: block;
-  font-size: 30px;
-  font-weight: 600;
+.stat-num {
+  font-size: 40px;
+  font-weight: 700;
+  color: $text;
 }
 
-.trip-meta {
-  display: block;
+.stat-label {
   margin-top: 8px;
   font-size: 22px;
   color: $sub;
 }
 
-.trip-arrow {
-  font-size: 40px;
-  color: $sub;
+.stat-divider {
+  width: 2px;
+  height: 56px;
+  background: $line;
 }
 
-.menu {
-  margin-top: 32px;
+/* 菜单 */
+.menu-card {
+  margin-top: 24px;
   background: #fff;
   border-radius: 24px;
-  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  padding: 4px 32px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 32px;
-  border-bottom: 1px solid $bg;
+  padding: 28px 0;
+
+  &:active { opacity: 0.7; }
 }
 
-.menu-item:last-child {
-  border-bottom: none;
+.menu-item-line {
+  border-top: 2px solid $line;
 }
 
 .menu-icon {
   font-size: 36px;
+  margin-right: 24px;
 }
 
 .menu-label {
   flex: 1;
-  margin-left: 20px;
   font-size: 30px;
+  color: $text;
+}
+
+.menu-badge {
+  font-size: 22px;
+  color: #fff;
+  background: $blue;
+  border-radius: 999px;
+  padding: 2px 16px;
+  margin-right: 12px;
 }
 
 .menu-arrow {
   font-size: 36px;
-  color: $sub;
+  color: #C4CCD8;
 }
 
 .footer {
-  margin-top: 60px;
+  margin-top: 48px;
   text-align: center;
 }
 
 .footer-text {
   font-size: 22px;
-  color: $sub;
+  color: #B8C0CE;
 }

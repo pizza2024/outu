@@ -1,98 +1,235 @@
 @import '../../app.scss';
 
 .preview {
+  height: 100vh;
+  background: $bg;
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
-.empty {
-  padding: 200px 0;
-  text-align: center;
+.preview-scroll {
+  flex: 1;
+  height: 0;
 }
 
-.empty-text {
-  color: $sub;
-  font-size: 28px;
+/* ===== 成功头 ===== */
+.done-head {
+  padding: 40px 40px 8px;
 }
 
-/* ===== 方案头 ===== */
-.plan-head {
-  background: linear-gradient(160deg, $sky, $teal);
-  padding: 32px;
-}
-
-.plan-title {
+.done-title {
   display: block;
-  font-size: 38px;
+  font-size: 44px;
   font-weight: 700;
-  color: #fff;
-}
-
-.plan-meta {
-  display: block;
-  margin-top: 10px;
-  font-size: 24px;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-/* ===== 每日 Tab ===== */
-.day-tabs {
-  white-space: nowrap;
-  background: #fff;
-  padding: 16px 24px;
-  box-shadow: 0 2px 8px rgba(31, 45, 61, 0.04);
-}
-
-.day-tab {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 28px;
-  margin-right: 16px;
-  border-radius: 20px;
-  background: $bg;
-}
-
-.day-tab-on {
-  background: linear-gradient(135deg, $sky, $teal);
-}
-
-.day-tab-text {
-  font-size: 28px;
-  font-weight: 600;
   color: $text;
 }
 
-.day-tab-date {
-  font-size: 20px;
-  color: $sub;
-  margin-top: 2px;
+.done-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
 }
 
-.day-tab-text-on {
+.done-route {
+  font-size: 26px;
+  color: $sub;
+}
+
+.done-budget {
+  font-size: 26px;
+  color: $blue;
+  font-weight: 600;
+}
+
+.done-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.done-tag {
+  font-size: 22px;
+  color: $blue;
+  background: $blue-bg;
+  border-radius: 999px;
+  padding: 6px 20px;
+  margin-right: 16px;
+  margin-bottom: 8px;
+}
+
+/* ===== 路线概览卡 ===== */
+.map-card {
+  margin: 24px 32px 0;
+  background: linear-gradient(135deg, #DCEBFF, #EEF5FF);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  padding: 40px 32px 28px;
+  overflow: hidden;
+}
+
+.map-route {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+}
+
+.map-stop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.map-dot {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid $blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.map-dot-start {
+  background: $blue;
+}
+
+.map-dot-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: $blue;
+}
+
+.map-dot-start .map-dot-num {
   color: #fff;
 }
 
-/* ===== 时间轴 ===== */
-.timeline {
+.map-stop-name {
+  margin-top: 12px;
+  font-size: 20px;
+  color: $text;
+  max-width: 140px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-line {
+  position: absolute;
+  top: 28px;
+  left: calc(50% + 32px);
+  right: calc(-50% + 32px);
+  height: 4px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, $blue 0, $blue 12px, transparent 12px, transparent 22px);
+  opacity: 0.5;
+}
+
+.map-hint {
+  display: block;
+  margin-top: 24px;
+  text-align: center;
+  font-size: 22px;
+  color: $sub;
+}
+
+/* ===== 每日行程卡 ===== */
+.day-card {
+  margin: 24px 32px 0;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  overflow: hidden;
+}
+
+.day-head {
+  display: flex;
+  align-items: center;
+  padding: 28px;
+
+  &:active { background: $bg; }
+}
+
+.day-head-main {
   flex: 1;
-  padding: 24px 32px;
+  min-width: 0;
+}
+
+.day-badge {
+  display: inline-block;
+  background: $blue;
+  border-radius: 8px;
+  padding: 4px 14px;
+}
+
+.day-badge-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
 }
 
 .day-theme {
   display: block;
-  font-size: 26px;
+  margin-top: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  color: $text;
+}
+
+.day-spots {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
   color: $sub;
-  margin-bottom: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-date {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: #B8C0CE;
+}
+
+.day-thumb {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 24px;
+  flex-shrink: 0;
+}
+
+.day-thumb-emoji {
+  font-size: 56px;
+}
+
+/* ===== 时间轴 ===== */
+.day-detail {
+  padding: 0 28px 28px;
+  border-top: 2px solid $line;
 }
 
 .node {
   display: flex;
+  margin-top: 24px;
 }
 
 .node-time {
-  width: 90px;
+  width: 88px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,26 +238,24 @@
 .node-start {
   font-size: 26px;
   font-weight: 600;
-  color: $teal;
+  color: $blue;
 }
 
 .node-line {
   flex: 1;
-  width: 4px;
-  background: #D9E8EE;
-  border-radius: 2px;
-  margin: 8px 0;
+  width: 2px;
+  background: $line;
+  margin-top: 8px;
 }
 
 .node-card {
   flex: 1;
-  min-width: 0;
-  background: #fff;
+  background: $bg;
   border-radius: 20px;
   padding: 24px;
-  margin-bottom: 20px;
-  margin-left: 16px;
-  box-shadow: 0 2px 10px rgba(31, 45, 61, 0.05);
+  margin-bottom: 4px;
+
+  &:active { opacity: 0.9; }
 }
 
 .node-head {
@@ -130,29 +265,26 @@
 
 .node-icon {
   font-size: 32px;
+  margin-right: 16px;
 }
 
 .node-title {
   flex: 1;
-  min-width: 0;
-  margin-left: 12px;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: $text;
 }
 
 .node-cost {
   font-size: 26px;
-  color: $coral;
+  color: $orange;
   font-weight: 600;
 }
 
 .node-detail {
   margin-top: 16px;
-  border-top: 1px solid $bg;
   padding-top: 16px;
+  border-top: 2px dashed $line;
 }
 
 .node-desc {
@@ -164,46 +296,47 @@
 
 .node-sub {
   display: block;
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 24px;
   color: $sub;
 }
 
 .node-tips {
   display: block;
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 24px;
-  color: #B7791F;
+  color: $blue;
 }
 
 .node-tools {
-  margin-top: 16px;
-  border-top: 1px solid $bg;
-  padding-top: 16px;
   display: flex;
-  justify-content: space-around;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px dashed $line;
 }
 
 .tool {
-  font-size: 26px;
-  color: $teal;
+  font-size: 24px;
+  color: $blue;
+  margin-right: 32px;
 }
 
 .tool-danger {
-  color: #E05252;
+  color: #EF4444;
 }
 
-/* ===== 添加节点 ===== */
+/* 添加节点 */
 .add-area {
-  margin-left: 106px;
-  margin-bottom: 20px;
+  margin-top: 16px;
 }
 
 .add-trigger {
-  border: 2px dashed #C7D8E0;
+  border: 2px dashed #C4CCD8;
   border-radius: 20px;
-  padding: 24px;
   text-align: center;
+  padding: 24px 0;
+
+  &:active { background: $bg; }
 }
 
 .add-trigger-text {
@@ -218,56 +351,64 @@
 
 .add-input {
   flex: 1;
-  height: 88px;
+  height: 84px;
   background: #fff;
-  border-radius: 20px;
+  border: 2px solid $line;
+  border-radius: 16px;
   padding: 0 24px;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .add-ph {
-  color: $sub;
+  color: #B8C0CE;
 }
 
 .add-ok {
   margin-left: 16px;
-  background: $teal;
-  border-radius: 20px;
+  background: $blue;
+  border-radius: 16px;
   padding: 20px 32px;
+
+  &:active { opacity: 0.85; }
 }
 
 .add-ok-text {
   color: #fff;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 /* ===== 底部操作栏 ===== */
 .actions {
-  display: flex;
-  padding: 16px 32px calc(16px + env(safe-area-inset-bottom));
+  padding: 12px 32px calc(20px + env(safe-area-inset-bottom));
   background: #fff;
-  box-shadow: 0 -2px 12px rgba(31, 45, 61, 0.05);
+  box-shadow: 0 -8px 24px rgba(30, 64, 140, 0.06);
+}
+
+.actions-row {
+  display: flex;
+  gap: 20px;
 }
 
 .act {
   flex: 1;
-  border-radius: 40px;
-  padding: 20px 0;
+  border: 2px solid $line;
+  border-radius: 999px;
   text-align: center;
-  margin-right: 16px;
-  background: $bg;
-}
+  padding: 24px 0;
+  background: #fff;
 
-.act:last-child {
-  margin-right: 0;
+  &:active { background: $bg; }
 }
 
 .act-on {
-  background: rgba(25, 181, 166, 0.12);
+  border-color: $blue;
+  background: $blue-bg;
 }
 
 .act-primary {
-  background: linear-gradient(135deg, $sky, $teal);
+  border: none;
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
+  box-shadow: 0 10px 24px rgba(46, 124, 246, 0.3);
 }
 
 .act-text {
@@ -276,11 +417,42 @@
 }
 
 .act-text-on {
-  color: $teal;
+  color: $blue;
   font-weight: 600;
 }
 
 .act-text-light {
   color: #fff;
   font-weight: 600;
+}
+
+.share-btn {
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  font-size: 26px;
+  color: $blue;
+  line-height: 1.6;
+  padding: 0;
+
+  &::after { border: none; }
+}
+
+.share-btn-hover {
+  opacity: 0.7;
+}
+
+/* 空状态 */
+.empty {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg;
+}
+
+.empty-text {
+  font-size: 28px;
+  color: $sub;
 }

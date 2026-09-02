@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro'
 import { useEffect, useState } from 'react'
 import { clearDraft, getDraft, getUser, saveDraft, uuid } from '../../store/plan'
 import { TravelRequest } from '../../types'
+import { getCurrentCity } from '../../utils/location'
 import './questionnaire.scss'
 
 const TOTAL_STEPS = 7
@@ -21,7 +22,15 @@ const PRIORITIES = [
   { key: 'food', label: '餐饮优先' },
   { key: 'transport', label: '交通优先' }
 ] as const
-const STYLES = ['文化古迹', '自然风光', '美食探店', '购物', '亲子娱乐', '户外运动', '休闲度假']
+const STYLE_CARDS: Array<{ label: string; emoji: string; sub: string }> = [
+  { label: '自然风光', emoji: '⛰️', sub: '山川湖海，拥抱自然' },
+  { label: '美食探店', emoji: '🍜', sub: '发现地道美味' },
+  { label: '文化古迹', emoji: '🏛️', sub: '历史古迹、文化探索' },
+  { label: '休闲度假', emoji: '🏖️', sub: '放松身心，悠闲度假' },
+  { label: '购物', emoji: '🛍️', sub: '商圈市集，买买买' },
+  { label: '户外运动', emoji: '🚴', sub: '徒步、潜水、骑行等' },
+  { label: '亲子娱乐', emoji: '🎡', sub: '遛娃好去处' }
+]
 const PACES = [
   { key: 'intensive', label: '紧凑型', desc: '每天排满，多玩多看' },
   { key: 'comfortable', label: '舒适型', desc: '劳逸结合，刚刚好' },
@@ -38,7 +47,10 @@ function fmt(d: Date): string {
 export default function Questionnaire() {
   const [step, setStep] = useState(1)
 
-  // Step1 目的地
+  // Step1 出发地 + 目的地
+  const [origin, setOrigin] = useState('')
+  const [originGeo, setOriginGeo] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [locating, setLocating] = useState(false)
   const [cityInput, setCityInput] = useState('')
   const [cities, setCities] = useState<string[]>([])
 
@@ -68,13 +80,36 @@ export default function Questionnaire() {
   const totalDays =
     Math.max(Math.round((new Date(back).getTime() - new Date(depart).getTime()) / 86400000) + 1, 1)
 
+  /** 定位并填充出发地（失败静默，用户可手动输入） */
+  const locate = async () => {
+    if (locating) return
+    setLocating(true)
+    const geo = await getCurrentCity()
+    setLocating(false)
+    if (geo) {
+      setOrigin(geo.city)
+      setOriginGeo({ latitude: geo.latitude, longitude: geo.longitude })
+    } else {
+      Taro.showToast({ title: '定位失败，请手动输入出发地', icon: 'none' })
+    }
+  }
+
   /** 恢复草稿（模板预填 / 断点续填） */
   useEffect(() => {
     const draft = getDraft()
-    if (!draft) return
-    if (draft.destinations?.length) setCities(draft.destinations.map((d) => d.city))
-    if (draft.preferences?.styles?.length) setStyles(draft.preferences.styles)
-    if (draft.__step) setStep(draft.__step)
+    if (draft) {
+      if (draft.destinations?.length) setCities(draft.destinations.map((d) => d.city))
+      if (draft.preferences?.styles?.length) setStyles(draft.preferences.styles)
+      if (draft.origin?.city) {
+        setOrigin(draft.origin.city)
+        if (draft.origin.latitude && draft.origin.longitude) {
+          setOriginGeo({ latitude: draft.origin.latitude, longitude: draft.origin.longitude })
+        }
+      }
+      if (draft.__step) setStep(draft.__step)
+    }
+    // 无草稿出发地时自动定位填充默认值
+    if (!draft?.origin?.city) locate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -83,7 +118,7 @@ export default function Questionnaire() {
   }
 
   const stepValid = (): boolean => {
-    if (step === 1) return cities.length > 0
+    if (step === 1) return origin.trim().length > 0 && cities.length > 0
     if (step === 2) return new Date(back) >= new Date(depart)
     if (step === 5) return styles.length > 0
     return true
@@ -92,6 +127,7 @@ export default function Questionnaire() {
   const persistDraft = (nextStep: number) => {
     saveDraft({
       destinations: cities.map((c) => ({ city: c, country: '中国', days: 1 })),
+      ...(origin.trim() ? { origin: { city: origin.trim(), ...(originGeo || {}) } } : {}),
       preferences: { styles, pace, accommodation, food },
       __step: nextStep
     })
@@ -99,7 +135,11 @@ export default function Questionnaire() {
 
   const next = () => {
     if (!stepValid()) {
-      Taro.showToast({ title: step === 1 ? '请至少添加一个目的地' : step === 2 ? '返回日期不能早于出发日期' : '请至少选择一项', icon: 'none' })
+      const msg =
+        step === 1
+          ? !origin.trim() ? '请填写出发地（可点击定位）' : '请至少添加一个目的地'
+          : step === 2 ? '返回日期不能早于出发日期' : '请至少选择一项'
+      Taro.showToast({ title: msg, icon: 'none' })
       return
     }
     persistDraft(step + 1)
@@ -116,6 +156,7 @@ export default function Questionnaire() {
     user_id: getUser()?.openid || 'guest',
     timestamp: new Date().toISOString(),
     destinations: cities.map((c) => ({ city: c, country: '中国', days: totalDays })),
+    origin: { city: origin.trim(), ...(originGeo || {}) },
     travel_dates: { departure_date: depart, return_date: back, total_days: totalDays },
     travelers: { adults, children, elderly, special_needs: specialNeeds },
     budget: { total_range: BUDGET_RANGES[budgetIdx].range, currency: 'CNY', priority },
@@ -135,8 +176,6 @@ export default function Questionnaire() {
     clearDraft()
     Taro.navigateTo({ url: '/pages/generating/generating' })
   }
-
-  const stepTitles = ['目的地', '出行时间', '同行人员', '预算范围', '旅行偏好', '特殊要求', '确认信息']
 
   const counter = (label: string, value: number, setValue: (n: number) => void, min = 0) => (
     <View className='counter-row'>
@@ -167,18 +206,35 @@ export default function Questionnaire() {
     <View className='q'>
       {/* 进度条 */}
       <View className='progress-wrap'>
+        <Text className='progress-text'>{step}/{TOTAL_STEPS}</Text>
         <View className='progress-track'>
           <View className='progress-fill' style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
         </View>
-        <Text className='progress-text'>第 {step}/{TOTAL_STEPS} 步 · {stepTitles[step - 1]}</Text>
       </View>
 
       <View className='body'>
-        {/* Step 1 目的地 */}
+        {/* Step 1 出发地 + 目的地 */}
         {step === 1 && (
           <View>
-            <Text className='title'>想去哪里？</Text>
-            <Text className='hint'>支持城市 / 国家 / 景区，可添加多个目的地串联</Text>
+            <Text className='title'>从哪里出发，想去哪里？</Text>
+            <Text className='hint'>出发地已按当前定位填写，可手动修改</Text>
+            <View className='input-row'>
+              <Input
+                className='text-input'
+                placeholder={locating ? '正在定位当前位置…' : '输入出发城市，如：上海'}
+                placeholderClass='input-ph'
+                value={origin}
+                disabled={locating}
+                onInput={(e) => {
+                  setOrigin(e.detail.value)
+                  setOriginGeo(null)
+                }}
+              />
+              <View className='locate-btn' onClick={locate}>
+                <Text className='locate-btn-text'>📍 定位</Text>
+              </View>
+            </View>
+            <Text className='hint'>目的地：支持城市 / 国家 / 景区，可添加多个串联</Text>
             <View className='input-row'>
               <Input
                 className='text-input'
@@ -275,19 +331,31 @@ export default function Questionnaire() {
         {/* Step 5 偏好 */}
         {step === 5 && (
           <View>
-            <Text className='title'>喜欢怎么玩？</Text>
-            <Text className='hint'>旅行风格（多选）</Text>
-            {chipGroup(STYLES, styles, (x) => toggle(styles, setStyles, x))}
-            <Text className='hint' style={{ marginTop: '28px' }}>节奏偏好</Text>
+            <Text className='title'>这次旅行你更期待什么？</Text>
+            <Text className='hint'>可多选，帮助我们为你定制更合适的行程</Text>
+            <View className='style-grid'>
+              {STYLE_CARDS.map((s) => {
+                const on = styles.includes(s.label)
+                return (
+                  <View key={s.label} className={`style-card ${on ? 'style-card-on' : ''}`} onClick={() => toggle(styles, setStyles, s.label)}>
+                    {on && <View className='style-check'><Text className='style-check-icon'>✓</Text></View>}
+                    <Text className='style-emoji'>{s.emoji}</Text>
+                    <Text className={`style-label ${on ? 'style-label-on' : ''}`}>{s.label}</Text>
+                    <Text className='style-sub'>{s.sub}</Text>
+                  </View>
+                )
+              })}
+            </View>
+            <Text className='hint' style={{ marginTop: '36px' }}>节奏偏好</Text>
             {PACES.map((p) => (
               <View key={p.key} className={`pace-card ${pace === p.key ? 'pace-on' : ''}`} onClick={() => setPace(p.key)}>
                 <Text className={`pace-label ${pace === p.key ? 'pace-label-on' : ''}`}>{p.label}</Text>
                 <Text className='pace-desc'>{p.desc}</Text>
               </View>
             ))}
-            <Text className='hint' style={{ marginTop: '28px' }}>住宿偏好（多选）</Text>
+            <Text className='hint' style={{ marginTop: '36px' }}>住宿偏好（多选）</Text>
             {chipGroup(ACCOMMODATIONS, accommodation, (x) => toggle(accommodation, setAccommodation, x))}
-            <Text className='hint' style={{ marginTop: '28px' }}>餐饮偏好（多选）</Text>
+            <Text className='hint' style={{ marginTop: '36px' }}>餐饮偏好（多选）</Text>
             {chipGroup(FOODS, food, (x) => toggle(food, setFood, x))}
           </View>
         )}
@@ -313,6 +381,7 @@ export default function Questionnaire() {
           <View>
             <Text className='title'>确认一下，马上出发！</Text>
             {[
+              { label: '出发地', value: origin, edit: 1 },
               { label: '目的地', value: cities.join(' → '), edit: 1 },
               { label: '时间', value: `${depart} ~ ${back}（${totalDays}天）`, edit: 2 },
               { label: '人员', value: `${adults}大 ${children}小 ${elderly}老${specialNeeds.length ? ' · ' + specialNeeds.join('/') : ''}`, edit: 3 },
@@ -332,20 +401,25 @@ export default function Questionnaire() {
 
       {/* 底部按钮 */}
       <View className='footer'>
-        {step > 1 && (
-          <View className='btn-ghost' onClick={prev}>
-            <Text className='btn-ghost-text'>上一步</Text>
-          </View>
+        {step < TOTAL_STEPS && (
+          <Text className='footer-note'>💡 我们会根据你的选择优化行程建议</Text>
         )}
-        {step < TOTAL_STEPS ? (
-          <View className='btn-primary' onClick={next}>
-            <Text className='btn-primary-text'>下一步</Text>
-          </View>
-        ) : (
-          <View className='btn-primary btn-go' onClick={submit}>
-            <Text className='btn-primary-text'>🕊️ 开始规划</Text>
-          </View>
-        )}
+        <View className='footer-btns'>
+          {step > 1 && (
+            <View className='btn-ghost' onClick={prev}>
+              <Text className='btn-ghost-text'>上一步</Text>
+            </View>
+          )}
+          {step < TOTAL_STEPS ? (
+            <View className='btn-primary' onClick={next}>
+              <Text className='btn-primary-text'>下一题 →</Text>
+            </View>
+          ) : (
+            <View className='btn-primary btn-go' onClick={submit}>
+              <Text className='btn-primary-text'>开始规划 ✈️</Text>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   )

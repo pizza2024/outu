@@ -1,67 +1,96 @@
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text, Image, Button, Input } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
-import { getHistory, getUser, savePlan } from '../../store/plan'
-import { TravelPlan, UserInfo } from '../../types'
+import { getHistory, getUser, saveUser } from '../../store/plan'
+import { apiPost } from '../../utils/api'
+import { UserInfo } from '../../types'
 import logo from '../../assets/logo.png'
 import './profile.scss'
 
 export default function Profile() {
   const [user, setUser] = useState<UserInfo | null>(null)
-  const [history, setHistory] = useState<TravelPlan[]>([])
+  const [tripCount, setTripCount] = useState(0)
 
   useDidShow(() => {
     setUser(getUser())
-    setHistory(getHistory())
+    setTripCount(getHistory().length)
   })
 
-  const openPlan = (p: TravelPlan) => {
-    savePlan(p)
-    Taro.navigateTo({ url: '/pages/preview/preview' })
+  /** 微信头像选择（chooseAvatar 按钮回调，拿到临时头像路径） */
+  const onChooseAvatar = (e: any) => {
+    const avatar = e?.detail?.avatarUrl
+    if (!avatar || !user) return
+    const next = { ...user, avatar }
+    setUser(next)
+    saveUser(next)
+    apiPost('/api/auth/profile', { openid: user.openid, avatar }).catch(() => {})
+    Taro.showToast({ title: '头像已更新', icon: 'success' })
   }
+
+  /** 微信昵称输入框失焦保存 */
+  const onNickname = (e: any) => {
+    const nickname = (e?.detail?.value || '').trim()
+    if (!nickname || !user || nickname === user.nickname) return
+    const next = { ...user, nickname }
+    setUser(next)
+    saveUser(next)
+    apiPost('/api/auth/profile', { openid: user.openid, nickname }).catch(() => {})
+    Taro.showToast({ title: '昵称已更新', icon: 'success' })
+  }
+
+  const menus = [
+    { icon: '🗺️', label: '我的行程', badge: tripCount > 0 ? `${tripCount}` : '', action: () => Taro.switchTab({ url: '/pages/trips/trips' }) },
+    { icon: '🧮', label: '旅行经费计算', badge: '', action: () => Taro.switchTab({ url: '/pages/budget/budget' }) },
+    { icon: '⭐', label: '收藏模板', badge: '', action: () => Taro.showToast({ title: '敬请期待', icon: 'none' }) },
+    { icon: '💬', label: '意见反馈', badge: '', action: () => Taro.showToast({ title: '敬请期待', icon: 'none' }) },
+    { icon: '⚙️', label: '设置', badge: '', action: () => Taro.showToast({ title: '敬请期待', icon: 'none' }) }
+  ]
 
   return (
     <View className='profile'>
-      {/* 用户卡片 */}
+      {/* 用户卡片：点头像换头像，点昵称改昵称 */}
       <View className='user-card'>
-        <Image className='avatar' src={user?.avatar || logo} mode='aspectFit' />
+        <Button className='avatar-wrap' openType='chooseAvatar' onChooseAvatar={onChooseAvatar}>
+          <Image className='avatar' src={user?.avatar || logo} mode='aspectFit' />
+        </Button>
         <View className='user-info'>
-          <Text className='nickname'>{user?.nickname || '海鸥旅行者'}</Text>
+          <Input
+            className='nickname'
+            type='nickname'
+            value={user?.nickname || '海鸥旅行者'}
+            placeholder='点击设置昵称'
+            placeholderClass='nickname-ph'
+            onBlur={onNickname}
+          />
           <Text className='bio'>不懂 AI，也能拥有完美旅行</Text>
         </View>
       </View>
 
-      {/* 历史行程 */}
-      <View className='section'>
-        <Text className='section-title'>历史行程</Text>
-        {history.length === 0 && (
-          <View className='empty'>
-            <Text className='empty-text'>还没有行程，去首页创建一个吧 🕊️</Text>
-          </View>
-        )}
-        {history.map((p) => (
-          <View key={p.plan_id} className='trip-card' onClick={() => openPlan(p)}>
-            <View className='trip-info'>
-              <Text className='trip-title'>{p.summary.title}</Text>
-              <Text className='trip-meta'>
-                {p.summary.duration_label} · 预算 ¥{p.budget_breakdown.total_estimated} · {p.generated_at.slice(0, 10)}
-              </Text>
-            </View>
-            <Text className='trip-arrow'>›</Text>
-          </View>
-        ))}
+      {/* 数据概览 */}
+      <View className='stats-card'>
+        <View className='stat'>
+          <Text className='stat-num'>{tripCount}</Text>
+          <Text className='stat-label'>我的行程</Text>
+        </View>
+        <View className='stat-divider' />
+        <View className='stat'>
+          <Text className='stat-num'>0</Text>
+          <Text className='stat-label'>收藏模板</Text>
+        </View>
+        <View className='stat-divider' />
+        <View className='stat'>
+          <Text className='stat-num'>0</Text>
+          <Text className='stat-label'>旅行足迹</Text>
+        </View>
       </View>
 
-      {/* 其他菜单 */}
-      <View className='menu'>
-        {[
-          { icon: '⭐', label: '收藏模板' },
-          { icon: '💬', label: '意见反馈' },
-          { icon: '⚙️', label: '设置' }
-        ].map((m) => (
-          <View key={m.label} className='menu-item'>
+      {/* 菜单 */}
+      <View className='menu-card'>
+        {menus.map((m, i) => (
+          <View key={m.label} className={`menu-item ${i > 0 ? 'menu-item-line' : ''}`} onClick={m.action}>
             <Text className='menu-icon'>{m.icon}</Text>
             <Text className='menu-label'>{m.label}</Text>
+            {!!m.badge && <Text className='menu-badge'>{m.badge}</Text>}
             <Text className='menu-arrow'>›</Text>
           </View>
         ))}

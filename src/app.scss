@@ -1,10 +1,20 @@
-/* ===== 鸥途主题 ===== */
-$sky: #3E9BF0;
-$teal: #19B5A6;
-$coral: #FF8C66;
-$bg: #F5FAFB;
-$text: #1F2D3D;
-$sub: #8A9BA8;
+/* ===== 鸥途主题 · 蓝色卡片风（依照 UI 设计稿） ===== */
+$blue: #2E7CF6;            // 主色
+$blue-deep: #1F63E0;       // 主色深色（渐变端）
+$blue-light: #4DA3FF;      // 主色浅色（渐变端）
+$blue-bg: #EAF2FE;         // 主色浅底
+$bg: #F4F6FB;              // 页面底色
+$card: #FFFFFF;
+$text: #1A2B4A;            // 主文案
+$sub: #8A94A6;             // 次要文案
+$line: #EEF1F6;            // 分隔线
+$green: #22C55E;
+$orange: #FF8C42;
+
+/* 旧变量别名（pdf 页等未改写的样式兼容用） */
+$sky: $blue-light;
+$teal: $blue;
+$coral: $orange;
 
 page {
   background: $bg;
@@ -13,6 +23,40 @@ page {
   font-size: 28px;
 }
 
-view, text, input, button {
+view, text, input, button, textarea {
   box-sizing: border-box;
+}
+
+/* 通用卡片 */
+.card {
+  background: $card;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+}
+
+/* 主按钮（蓝色渐变胶囊） */
+.btn-primary-pill {
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(46, 124, 246, 0.32);
+  text-align: center;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 600;
+  padding: 26px 0;
+
+  &:active { opacity: 0.88; }
+}
+
+/* 次级按钮（描边胶囊） */
+.btn-ghost-pill {
+  background: #fff;
+  border: 2px solid $line;
+  border-radius: 999px;
+  text-align: center;
+  color: $sub;
+  font-size: 30px;
+  padding: 24px 0;
+
+  &:active { background: $bg; }
 }

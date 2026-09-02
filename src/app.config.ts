@@ -6,18 +6,20 @@ export default defineAppConfig({
     'pages/generating/generating',
     'pages/preview/preview',
     'pages/pdf/pdf',
+    'pages/trips/trips',
+    'pages/budget/budget',
     'pages/profile/profile'
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#3E9BF0',
+    navigationBarBackgroundColor: '#2E7CF6',
     navigationBarTitleText: '鸥途',
     navigationBarTextStyle: 'white',
-    backgroundColor: '#F5FAFB'
+    backgroundColor: '#F4F6FB'
   },
   tabBar: {
-    color: '#8A9BA8',
-    selectedColor: '#19B5A6',
+    color: '#8A94A6',
+    selectedColor: '#2E7CF6',
     backgroundColor: '#FFFFFF',
     list: [
       {
@@ -27,6 +29,18 @@ export default defineAppConfig({
         selectedIconPath: './assets/tabbar/home-active.png'
       },
       {
+        pagePath: 'pages/trips/trips',
+        text: '行程',
+        iconPath: './assets/tabbar/trip.png',
+        selectedIconPath: './assets/tabbar/trip-active.png'
+      },
+      {
+        pagePath: 'pages/budget/budget',
+        text: '工具',
+        iconPath: './assets/tabbar/tool.png',
+        selectedIconPath: './assets/tabbar/tool-active.png'
+      },
+      {
         pagePath: 'pages/profile/profile',
         text: '我的',
         iconPath: './assets/tabbar/user.png',
@@ -34,5 +48,11 @@ export default defineAppConfig({
       }
     ]
   },
-  cloud: true
+  cloud: true,
+  permission: {
+    'scope.userLocation': {
+      desc: '用于获取你的当前位置作为默认出发地'
+    }
+  },
+  requiredPrivateInfos: ['getLocation']
 })

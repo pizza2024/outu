@@ -137,7 +137,7 @@ export function mockPlan(req: TravelRequest): TravelPlan {
     daily_plans,
     transportation: {
       intercity: [{
-        leg: `出发地 → ${city}`,
+        leg: `${req.origin?.city || '出发地'} → ${city}`,
         mode: 'train',
         recommendations: [{
           option: '高铁二等座', departure_time: '08:30', arrival_time: '12:10',

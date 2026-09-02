@@ -1,0 +1,140 @@
+@import '../../app.scss';
+
+.trips {
+  min-height: 100vh;
+  background: $bg;
+  padding: 32px 32px 0;
+}
+
+.trips-head {
+  padding: 16px 8px 24px;
+}
+
+.trips-title {
+  display: block;
+  font-size: 44px;
+  font-weight: 700;
+  color: $text;
+}
+
+.trips-sub {
+  display: block;
+  margin-top: 10px;
+  font-size: 24px;
+  color: $sub;
+}
+
+/* 空状态 */
+.trips-empty {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trips-empty-emoji {
+  font-size: 96px;
+}
+
+.trips-empty-text {
+  margin-top: 24px;
+  font-size: 32px;
+  font-weight: 600;
+  color: $text;
+}
+
+.trips-empty-sub {
+  margin-top: 10px;
+  font-size: 24px;
+  color: $sub;
+}
+
+.trips-empty-btn {
+  margin-top: 36px;
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(46, 124, 246, 0.32);
+  padding: 22px 64px;
+
+  &:active { opacity: 0.88; }
+}
+
+.trips-empty-btn-text {
+  color: #fff;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* 行程卡 */
+.trip-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  padding: 30px 32px;
+  margin-bottom: 24px;
+
+  &:active { background: $bg; }
+}
+
+.trip-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-title {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: $text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-meta-row {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.trip-meta {
+  font-size: 24px;
+  color: $sub;
+}
+
+.trip-dot {
+  margin: 0 12px;
+  color: #C4CCD8;
+}
+
+.trip-tags {
+  display: flex;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.trip-budget {
+  font-size: 22px;
+  color: $blue;
+  background: $blue-bg;
+  border-radius: 999px;
+  padding: 4px 18px;
+  margin-right: 12px;
+}
+
+.trip-tag {
+  font-size: 22px;
+  color: $sub;
+  background: $bg;
+  border-radius: 999px;
+  padding: 4px 18px;
+  margin-right: 12px;
+}
+
+.trip-arrow {
+  font-size: 40px;
+  color: #C4CCD8;
+  margin-left: 16px;
+}

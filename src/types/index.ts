@@ -10,6 +10,12 @@ export interface TravelRequest {
     country: string
     days: number
   }>
+  /** 出发地（默认取当前定位城市，用户可修改） */
+  origin?: {
+    city: string
+    latitude?: number
+    longitude?: number
+  }
   travel_dates: {
     departure_date: string
     return_date: string

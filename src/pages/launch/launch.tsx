@@ -1,27 +1,63 @@
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState } from 'react'
-import { getUser, saveUser, uuid } from '../../store/plan'
+import { saveUser } from '../../store/plan'
+import { apiPost } from '../../utils/api'
 import logo from '../../assets/logo.png'
 import './launch.scss'
 
+interface LoginResult {
+  openid: string | null
+  nickname?: string
+  avatar?: string
+  error?: string
+}
+
 export default function Launch() {
   const [agreed, setAgreed] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const enter = () => {
     Taro.reLaunch({ url: '/pages/index/index' })
   }
 
-  const login = () => {
+  /** 微信一键登录：Taro.login 拿 code → 后端 jscode2session 换 openid */
+  const login = async () => {
     if (!agreed) {
       Taro.showToast({ title: '请先同意隐私协议', icon: 'none' })
       return
     }
-    // MVP：微信一键登录占位。正式版调用 Taro.login 拿 code → 云函数换 openid
-    if (!getUser()) {
-      saveUser({ openid: `guest_${uuid().slice(0, 8)}`, nickname: '海鸥旅行者', avatar: '' })
+    if (loading) return
+    setLoading(true)
+    try {
+      const { code } = await Taro.login()
+      if (!code) throw new Error('未获取到登录凭证')
+      const res = await apiPost<LoginResult>('/api/auth/login', { code })
+      if (res?.openid) {
+        saveUser({
+          openid: res.openid,
+          nickname: res.nickname || '海鸥旅行者',
+          avatar: res.avatar || ''
+        })
+        enter()
+      } else {
+        Taro.showModal({
+          title: '登录失败',
+          content: res?.error || '请稍后重试',
+          showCancel: false,
+          confirmText: '知道了'
+        })
+      }
+    } catch (e: any) {
+      Taro.showModal({
+        title: '登录失败',
+        content: e?.errMsg || e?.message || '网络异常',
+        showCancel: false,
+        confirmText: '知道了'
+      })
+    } finally {
+      setLoading(false)
     }
-    enter()
   }
 
   return (
@@ -34,8 +70,8 @@ export default function Launch() {
       </View>
 
       <View className='actions'>
-        <View className='login-btn' onClick={login}>
-          <Text className='login-text'>微信一键登录</Text>
+        <View className={`login-btn ${loading ? 'login-btn-loading' : ''}`} onClick={login}>
+          <Text className='login-text'>{loading ? '登录中…' : '微信一键登录'}</Text>
         </View>
         <View className='privacy' onClick={() => setAgreed(!agreed)}>
           <View className={`checkbox ${agreed ? 'checked' : ''}`}>
