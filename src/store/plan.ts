@@ -52,21 +52,6 @@ export function getHistory(): TravelPlan[] {
 export function deleteHistory(planId: string) {
   const list: TravelPlan[] = Taro.getStorageSync(HISTORY_KEY) || []
   Taro.setStorageSync(HISTORY_KEY, list.filter((p) => p.plan_id !== planId))
-  // 同步清掉置顶标记
-  const pins: string[] = Taro.getStorageSync(PIN_KEY) || []
-  Taro.setStorageSync(PIN_KEY, pins.filter((id) => id !== planId))
-}
-
-/* ===== 行程置顶（不改变列表顺序，仅标记） ===== */
-const PIN_KEY = 'outu_pins'
-export function getPins(): string[] {
-  return Taro.getStorageSync(PIN_KEY) || []
-}
-export function togglePin(planId: string): string[] {
-  const pins = getPins()
-  const next = pins.includes(planId) ? pins.filter((id) => id !== planId) : [...pins, planId]
-  Taro.setStorageSync(PIN_KEY, next)
-  return next
 }
 
 /* ===== 预算实时重算（微调后调用） ===== */

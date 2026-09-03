@@ -67,7 +67,7 @@
   font-weight: 600;
 }
 
-/* 滑动删除/置顶容器 */
+/* 滑动删除容器 */
 .swipe-wrap {
   position: relative;
   margin-bottom: 24px;
@@ -80,7 +80,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 160px;
+  width: 160rpx;
   display: flex;
 }
 
@@ -91,10 +91,6 @@
   justify-content: center;
 
   &:active { opacity: 0.85; }
-}
-
-.swipe-pin {
-  background: $blue;
 }
 
 .swipe-delete {
@@ -130,19 +126,7 @@
   min-width: 0;
 }
 
-.trip-title-row {
-  display: flex;
-  align-items: center;
-}
-
-.trip-pin-icon {
-  font-size: 26px;
-  margin-right: 10px;
-}
-
 .trip-title {
-  flex: 1;
-  min-width: 0;
   display: block;
   font-size: 32px;
   font-weight: 700;

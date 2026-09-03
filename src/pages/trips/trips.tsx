@@ -1,16 +1,19 @@
 import { View, Text, ITouchEvent } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useRef, useState } from 'react'
-import { deleteHistory, getHistory, getPins, savePlan, togglePin } from '../../store/plan'
+import { deleteHistory, getHistory, savePlan } from '../../store/plan'
 import { TravelPlan } from '../../types'
 import './trips.scss'
 
-/** 滑动操作区总宽度（px）：置顶 + 删除两个按钮 */
-const ACTION_W = 160
+/**
+ * 删除按钮宽度：scss 里写 160rpx，这里换算成物理 px。
+ * 本项目 designWidth=750 且 deviceRatio 750:1，即 scss 1px=1rpx=screenWidth/750 物理 px，
+ * 而触摸事件与内联 transform 用的是物理 px，必须换算，否则按钮区和滑动距离对不上。
+ */
+const ACTION_W = (160 * Taro.getWindowInfo().screenWidth) / 750
 
 export default function Trips() {
   const [history, setHistory] = useState<TravelPlan[]>([])
-  const [pins, setPins] = useState<string[]>([])
   /** 当前滑开的卡片 id */
   const [openId, setOpenId] = useState<string | null>(null)
   /** 拖拽中的位移 {id, x}，松手后由 openId 决定最终位置 */
@@ -19,7 +22,6 @@ export default function Trips() {
 
   useDidShow(() => {
     setHistory(getHistory())
-    setPins(getPins())
     setOpenId(null)
     setDrag(null)
   })
@@ -75,12 +77,7 @@ export default function Trips() {
     touch.current.swiping = false
   }
 
-  /* ===== 操作 ===== */
-  const onPin = (p: TravelPlan) => {
-    setPins(togglePin(p.plan_id))
-    setOpenId(null)
-  }
-
+  /* ===== 删除 ===== */
   const onDelete = (p: TravelPlan) => {
     Taro.showModal({
       title: '删除行程',
@@ -91,7 +88,6 @@ export default function Trips() {
         if (res.confirm) {
           deleteHistory(p.plan_id)
           setHistory(getHistory())
-          setPins(getPins())
           setOpenId(null)
         }
       }
@@ -116,16 +112,12 @@ export default function Trips() {
         </View>
       ) : (
         history.map((p) => {
-          const pinned = pins.includes(p.plan_id)
           const offset = offsetOf(p.plan_id)
           const dragging = drag?.id === p.plan_id
           return (
             <View key={p.plan_id} className='swipe-wrap'>
-              {/* 滑开后露出的操作按钮 */}
+              {/* 滑开后露出的删除按钮 */}
               <View className='swipe-actions'>
-                <View className='swipe-btn swipe-pin' onClick={() => onPin(p)}>
-                  <Text className='swipe-btn-text'>{pinned ? '取消置顶' : '置顶'}</Text>
-                </View>
                 <View className='swipe-btn swipe-delete' onClick={() => onDelete(p)}>
                   <Text className='swipe-btn-text'>删除</Text>
                 </View>
@@ -141,10 +133,7 @@ export default function Trips() {
                 onClick={() => openPlan(p)}
               >
                 <View className='trip-main'>
-                  <View className='trip-title-row'>
-                    {pinned && <Text className='trip-pin-icon'>📌</Text>}
-                    <Text className='trip-title'>{p.summary.title}</Text>
-                  </View>
+                  <Text className='trip-title'>{p.summary.title}</Text>
                   <View className='trip-meta-row'>
                     <Text className='trip-meta'>{p.summary.duration_label}</Text>
                     <Text className='trip-dot'>·</Text>
