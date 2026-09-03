@@ -1,7 +1,8 @@
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState } from 'react'
-import { saveUser } from '../../store/plan'
+import { IS_DEV } from '../../config'
+import { getUser, saveUser, uuid } from '../../store/plan'
 import { apiPost } from '../../utils/api'
 import logo from '../../assets/logo.png'
 import './launch.scss'
@@ -21,8 +22,21 @@ export default function Launch() {
     Taro.reLaunch({ url: '/pages/index/index' })
   }
 
+  /** 开发模式：跳过登录，用本地游客身份直接进入 */
+  const skipLogin = () => {
+    if (!getUser()) {
+      saveUser({ openid: `guest_${uuid().slice(0, 8)}`, nickname: '海鸥旅行者', avatar: '' })
+    }
+    enter()
+  }
+
   /** 微信一键登录：Taro.login 拿 code → 后端 jscode2session 换 openid */
   const login = async () => {
+    // 开发模式直接跳过登录和协议确认
+    if (IS_DEV) {
+      skipLogin()
+      return
+    }
     if (!agreed) {
       Taro.showToast({ title: '请先同意隐私协议', icon: 'none' })
       return
@@ -71,7 +85,7 @@ export default function Launch() {
 
       <View className='actions'>
         <View className={`login-btn ${loading ? 'login-btn-loading' : ''}`} onClick={login}>
-          <Text className='login-text'>{loading ? '登录中…' : '微信一键登录'}</Text>
+          <Text className='login-text'>{loading ? '登录中…' : IS_DEV ? '开发模式 · 直接进入' : '微信一键登录'}</Text>
         </View>
         <View className='privacy' onClick={() => setAgreed(!agreed)}>
           <View className={`checkbox ${agreed ? 'checked' : ''}`}>
