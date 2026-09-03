@@ -67,17 +67,62 @@
   font-weight: 600;
 }
 
+/* 滑动删除/置顶容器 */
+.swipe-wrap {
+  position: relative;
+  margin-bottom: 24px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 160px;
+  display: flex;
+}
+
+.swipe-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active { opacity: 0.85; }
+}
+
+.swipe-pin {
+  background: $blue;
+}
+
+.swipe-delete {
+  background: #E8503A;
+}
+
+.swipe-btn-text {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 600;
+}
+
 /* 行程卡 */
 .trip-card {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   background: #fff;
   border-radius: 24px;
   box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
   padding: 30px 32px;
-  margin-bottom: 24px;
 
   &:active { background: $bg; }
+}
+
+.trip-card-anim {
+  transition: transform 0.2s ease;
 }
 
 .trip-main {
@@ -85,7 +130,19 @@
   min-width: 0;
 }
 
+.trip-title-row {
+  display: flex;
+  align-items: center;
+}
+
+.trip-pin-icon {
+  font-size: 26px;
+  margin-right: 10px;
+}
+
 .trip-title {
+  flex: 1;
+  min-width: 0;
   display: block;
   font-size: 32px;
   font-weight: 700;
