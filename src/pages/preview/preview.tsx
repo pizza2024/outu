@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Input, Button } from '@tarojs/components'
+import { View, Text, ScrollView, Input, Button, Image } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { useRef, useState } from 'react'
 import { getPlan, getTodoDone, recalcBudget, savePlan, toggleTodoDone } from '../../store/plan'
@@ -151,20 +151,28 @@ export default function Preview() {
         enhanced
         showScrollbar={false}
       >
-        {/* 头部概要 */}
+        {/* 头部概要卡：缩略图 + 标题 + 标签 + 人均预算 */}
         <View className='done-head' id='top'>
-          <Text className='done-title'>{plan.summary.title}</Text>
-          <View className='done-meta'>
-            <Text className='done-route'>{plan.summary.duration_label} · {plan.summary.destination_label}</Text>
-            <Text className='done-budget'>人均预算 ¥{perPerson.toLocaleString()}</Text>
-          </View>
-          {plan.summary.theme_tags.length > 0 && (
-            <View className='done-tags'>
-              {plan.summary.theme_tags.slice(0, 4).map((t) => (
-                <Text key={t} className='done-tag'>{t}</Text>
-              ))}
+          {plan.summary.cover_image_url ? (
+            <Image className='done-thumb' src={plan.summary.cover_image_url} mode='aspectFill' />
+          ) : (
+            <View className='done-thumb done-thumb-ph'>
+              <Text className='done-thumb-emoji'>🏞️</Text>
             </View>
           )}
+          <View className='done-main'>
+            <View className='done-row'>
+              <Text className='done-title'>{plan.summary.duration_label} · {plan.summary.destination_label}</Text>
+              <Text className='done-budget'>人均预算 ¥{perPerson.toLocaleString()}</Text>
+            </View>
+            {plan.summary.theme_tags.length > 0 && (
+              <View className='done-tags'>
+                {plan.summary.theme_tags.slice(0, 4).map((t) => (
+                  <Text key={t} className='done-tag'>{t}</Text>
+                ))}
+              </View>
+            )}
+          </View>
         </View>
 
         {/* 行前待办：订票预约等事项，全部排在时间线最开头 */}
@@ -188,6 +196,7 @@ export default function Preview() {
                   {!!t.detail && <Text className='todo-detail'>{t.detail}</Text>}
                 </View>
                 {!!t.due_date && <Text className='todo-due'>{t.due_date.slice(5)} 前</Text>}
+                <Text className='todo-chevron'>›</Text>
               </View>
             )
           })}
@@ -309,13 +318,13 @@ export default function Preview() {
       <View className='actions'>
         <View className='actions-row'>
           <View className={`act ${editing ? 'act-on' : ''}`} onClick={() => { setEditing(!editing); setAdding(-1) }}>
-            <Text className={`act-text ${editing ? 'act-text-on' : ''}`}>{editing ? '✓ 完成' : '✏️ 微调'}</Text>
+            <Text className={`act-text ${editing ? 'act-text-on' : ''}`}>{editing ? '✓ 完成' : '🎚 微调'}</Text>
           </View>
           <View className='act act-primary' onClick={() => Taro.showToast({ title: '已保存到行程', icon: 'success' })}>
             <Text className='act-text act-text-light'>💾 保存行程</Text>
           </View>
           <View className='act' onClick={() => Taro.navigateTo({ url: '/pages/pdf/pdf' })}>
-            <Text className='act-text'>📄 长图</Text>
+            <Text className='act-text'>🖼 长图</Text>
           </View>
         </View>
         <Button className='share-btn' openType='share' hoverClass='share-btn-hover'>分享给伙伴 ›</Button>
