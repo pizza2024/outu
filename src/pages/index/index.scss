@@ -1,119 +1,50 @@
 @import '../../app.scss';
 
 .home {
-  min-height: 100vh;
+  height: 100vh;
   background: $bg;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ===== Hero ===== */
-.hero {
-  position: relative;
-  padding: 48px 48px 120px;
-  background: linear-gradient(160deg, #5FB0FF 0%, #2E7CF6 55%, #1F63E0 100%);
-  border-radius: 0 0 48px 48px;
-  overflow: hidden;
+/* ===== 空行程状态 ===== */
+.home-empty {
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px;
 }
 
-.hero-title {
-  display: block;
-  font-size: 56px;
+.empty-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 16px 40px rgba(30, 64, 140, 0.08);
+  padding: 80px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-title {
+  font-size: 44px;
   font-weight: 700;
-  color: #fff;
-  line-height: 1.35;
-  white-space: pre-line;
+  color: $text;
   letter-spacing: 2px;
 }
 
-.hero-sub {
-  display: block;
-  margin-top: 20px;
+.empty-sub {
+  margin-top: 24px;
   font-size: 26px;
-  color: rgba(255, 255, 255, 0.85);
+  color: $sub;
+  text-align: center;
+  line-height: 1.7;
+  white-space: pre-line;
 }
 
-.hero-deco {
-  position: absolute;
-  opacity: 0.5;
-}
-
-.hero-deco-1 {
-  top: 60px;
-  right: 72px;
-  font-size: 64px;
-  transform: rotate(20deg);
-}
-
-.hero-deco-2 {
-  bottom: 100px;
-  right: 160px;
-  font-size: 44px;
-  opacity: 0.35;
-}
-
-/* ===== 快捷规划表单卡 ===== */
-.form-card {
-  margin: -72px 32px 0;
-  position: relative;
-  z-index: 2;
-  background: #fff;
-  border-radius: 28px;
-  box-shadow: 0 16px 40px rgba(30, 64, 140, 0.10);
-  padding: 12px 32px 36px;
-}
-
-.form-row {
-  display: flex;
-  align-items: center;
-  padding: 30px 0;
-}
-
-.form-icon {
-  font-size: 36px;
-  margin-right: 24px;
-}
-
-.form-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.form-label {
-  font-size: 30px;
-  font-weight: 600;
-  color: $text;
-}
-
-.form-input {
-  margin-top: 8px;
-  height: 44px;
-  padding: 0;
-  font-size: 26px;
-  color: $text;
-}
-
-.form-ph {
-  color: #B8C0CE;
-  font-size: 26px;
-}
-
-.form-value {
-  font-size: 28px;
-  color: $text;
-  margin-right: 8px;
-}
-
-.form-arrow {
-  font-size: 36px;
-  color: #C4CCD8;
-}
-
-.form-divider {
-  height: 2px;
-  background: $line;
-}
-
-.cta {
-  margin-top: 32px;
+/* 主按钮 */
+.create-btn {
+  margin-top: 48px;
+  width: 100%;
   background: linear-gradient(135deg, $blue-light, $blue-deep);
   border-radius: 999px;
   box-shadow: 0 12px 28px rgba(46, 124, 246, 0.32);
@@ -123,142 +54,90 @@
   &:active { opacity: 0.88; }
 }
 
-.cta-text {
+.create-btn-text {
   color: #fff;
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 600;
   letter-spacing: 4px;
 }
 
-/* ===== 区块 ===== */
-.section {
-  margin-top: 40px;
-  padding: 0 32px;
+/* ===== 行程列表状态 ===== */
+.trip-scroll {
+  flex: 1;
+  height: 0;
 }
 
-.section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+.trip-list {
+  padding: 32px 32px 0;
+}
+
+.trip-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
+  padding: 32px;
   margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 34px;
-  font-weight: 700;
-  color: $text;
-}
-
-.section-sub {
-  font-size: 24px;
-  color: $sub;
-}
-
-/* 模板横滑 */
-.tpl-scroll {
-  width: 100%;
-  white-space: nowrap;
-}
-
-.tpl-row {
-  display: inline-flex;
-  padding: 4px 4px 16px;
-}
-
-.tpl-card {
-  display: inline-block;
-  width: 300px;
-  margin-right: 24px;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
-  overflow: hidden;
-  vertical-align: top;
-}
-
-.tpl-cover {
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tpl-emoji {
-  font-size: 72px;
-}
-
-.tpl-body {
-  padding: 20px 24px 24px;
-}
-
-.tpl-name {
-  display: block;
-  font-size: 28px;
-  font-weight: 600;
-  color: $text;
-  white-space: normal;
-}
-
-.tpl-desc {
-  display: block;
-  margin-top: 8px;
-  font-size: 22px;
-  color: $sub;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tpl-days {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 20px;
-  color: $blue;
-  background: $blue-bg;
-  border-radius: 999px;
-  padding: 4px 16px;
-}
-
-/* 最近行程 */
-.recent-card {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
-  padding: 28px 32px;
 
   &:active { background: $bg; }
 }
 
-.recent-info {
-  flex: 1;
-  min-width: 0;
+.trip-route {
+  display: flex;
+  align-items: center;
 }
 
-.recent-title {
-  display: block;
-  font-size: 30px;
-  font-weight: 600;
+.trip-city {
+  font-size: 36px;
+  font-weight: 700;
   color: $text;
+  max-width: 40%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.recent-date {
-  display: block;
-  margin-top: 8px;
+.trip-arrow {
+  margin: 0 20px;
+  font-size: 32px;
+  color: $blue;
+}
+
+.trip-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.trip-days {
   font-size: 24px;
-  color: $sub;
+  color: $blue;
+  background: $blue-bg;
+  border-radius: 999px;
+  padding: 6px 22px;
 }
 
-.recent-arrow {
-  font-size: 40px;
-  color: #C4CCD8;
+.trip-budget {
   margin-left: 16px;
+  font-size: 24px;
+  color: $orange;
+  background: #FFF3EA;
+  border-radius: 999px;
+  padding: 6px 22px;
 }
 
-.bottom-space {
-  height: 60px;
+.trip-date {
+  display: block;
+  margin-top: 16px;
+  font-size: 22px;
+  color: #B8C0CE;
+}
+
+/* 底部新建按钮 */
+.home-footer {
+  padding: 16px 32px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(244, 246, 251, 0), $bg 40%);
+
+  .create-btn {
+    margin-top: 0;
+  }
 }
