@@ -48,11 +48,5 @@ export default defineAppConfig({
       }
     ]
   },
-  cloud: true,
-  permission: {
-    'scope.userLocation': {
-      desc: '用于获取你的当前位置作为默认出发地'
-    }
-  },
-  requiredPrivateInfos: ['getLocation']
+  cloud: true
 })
