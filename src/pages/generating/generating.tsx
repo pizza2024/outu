@@ -1,8 +1,9 @@
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IS_DEV } from '../../config'
 import { getUser, mockPlan, pushHistory, savePlan } from '../../store/plan'
+import { addTask, removeTask, updateTask } from '../../store/task'
 import { apiPost } from '../../utils/api'
 import { TravelPlan, TravelRequest } from '../../types'
 import './generating.scss'
@@ -24,10 +25,13 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export default function Generating() {
   const [tipIdx, setTipIdx] = useState(0)
+  /** 用户是否已离开本页（离开后轮询继续，但不再自动跳转） */
+  const left = useRef(false)
 
   useEffect(() => {
     const timer = setInterval(() => setTipIdx((i) => (i + 1) % TIPS.length), 2000)
     generate().finally(() => clearInterval(timer))
+    return () => { left.current = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -42,6 +46,7 @@ export default function Generating() {
 
     let plan: TravelPlan | null = null
     let failReason = ''
+    let jobId = ''
     try {
       // 1) 提交异步生成任务（立即返回 job_id，不会被网关超时掐断）
       const submit = await apiPost<{ job_id: string | null; error?: string }>(
@@ -51,6 +56,15 @@ export default function Generating() {
       if (!submit?.job_id) {
         failReason = submit?.error || '任务创建失败'
       } else {
+        jobId = submit.job_id
+        // 登记任务：用户离开本页后，行程页可继续跟踪进度
+        addTask({
+          job_id: jobId,
+          dest: request.destinations.map((d) => d.city).join('、') || '目的地',
+          total_days: request.travel_dates.total_days,
+          created_at: Date.now(),
+          status: 'generating'
+        })
         // 2) 轮询结果
         for (let i = 0; i < POLL_MAX; i++) {
           await sleep(POLL_INTERVAL)
@@ -91,7 +105,18 @@ export default function Generating() {
 
     savePlan(plan)
     pushHistory(plan)
+    if (jobId) updateTask(jobId, { status: 'done', plan_id: plan.plan_id })
+
+    if (left.current) {
+      // 用户已离开：结果留在行程页的「已生成」卡片里，不打断用户
+      return
+    }
+    if (jobId) removeTask(jobId)
     Taro.redirectTo({ url: '/pages/preview/preview' })
+  }
+
+  const leave = () => {
+    Taro.switchTab({ url: '/pages/trips/trips' })
   }
 
   return (
@@ -102,7 +127,11 @@ export default function Generating() {
       <View className='gen-bar'>
         <View className='gen-bar-fill' />
       </View>
-      <Text className='gen-note'>AI 正在深度规划，约需 1-3 分钟，请稍候</Text>
+      <Text className='gen-note'>AI 正在深度规划，约需 1-3 分钟</Text>
+      <View className='gen-leave' onClick={leave}>
+        <Text className='gen-leave-text'>先去逛逛 ›</Text>
+      </View>
+      <Text className='gen-leave-hint'>可以先离开，生成完成后在「行程」页查看结果</Text>
     </View>
   )
 }

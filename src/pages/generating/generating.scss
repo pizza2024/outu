@@ -60,3 +60,24 @@
   font-size: 24px;
   color: rgba(255, 255, 255, 0.7);
 }
+
+.gen-leave {
+  margin-top: 48px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 20px 56px;
+
+  &:active { opacity: 0.8; }
+}
+
+.gen-leave-text {
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.gen-leave-hint {
+  margin-top: 20px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+}

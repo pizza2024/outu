@@ -1,7 +1,9 @@
 import { View, Text, ITouchEvent } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidHide, useDidShow } from '@tarojs/taro'
 import { useRef, useState } from 'react'
-import { deleteHistory, getHistory, savePlan } from '../../store/plan'
+import { deleteHistory, getHistory, pushHistory, savePlan } from '../../store/plan'
+import { GenTask, getTasks, removeTask, updateTask } from '../../store/task'
+import { apiPost } from '../../utils/api'
 import { TravelPlan } from '../../types'
 import './trips.scss'
 
@@ -14,17 +16,79 @@ const ACTION_W = (160 * Taro.getWindowInfo().screenWidth) / 750
 
 export default function Trips() {
   const [history, setHistory] = useState<TravelPlan[]>([])
+  const [tasks, setTasks] = useState<GenTask[]>([])
   /** 当前滑开的卡片 id */
   const [openId, setOpenId] = useState<string | null>(null)
   /** 拖拽中的位移 {id, x}，松手后由 openId 决定最终位置 */
   const [drag, setDrag] = useState<{ id: string; x: number } | null>(null)
   const touch = useRef({ startX: 0, startY: 0, baseX: 0, swiping: false })
+  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const refresh = () => {
+    setHistory(getHistory())
+    setTasks(getTasks())
+  }
+
+  /** 轮询生成中的任务：完成则入库并刷新（pushHistory 按 plan_id 去重，重复轮询安全） */
+  const pollTasks = async () => {
+    const pending = getTasks().filter((t) => t.status === 'generating')
+    if (!pending.length) return
+    for (const t of pending) {
+      try {
+        const r = await apiPost<{ status: string; plan?: TravelPlan; error?: string }>(
+          '/api/plan/result',
+          { job_id: t.job_id }
+        )
+        if (r?.status === 'done' && r.plan) {
+          pushHistory(r.plan)
+          updateTask(t.job_id, { status: 'done', plan_id: r.plan.plan_id })
+        } else if (r?.status === 'error') {
+          updateTask(t.job_id, { status: 'error', error: r.error })
+        }
+      } catch {
+        /* 网络波动，下一轮再试 */
+      }
+    }
+    refresh()
+  }
 
   useDidShow(() => {
-    setHistory(getHistory())
+    refresh()
     setOpenId(null)
     setDrag(null)
+    pollTasks()
+    pollTimer.current = setInterval(pollTasks, 5000)
   })
+
+  useDidHide(() => {
+    if (pollTimer.current) {
+      clearInterval(pollTimer.current)
+      pollTimer.current = null
+    }
+  })
+
+  /** 任务卡片点击：已生成→打开方案；失败→重新填写；生成中→提示 */
+  const onTaskClick = (t: GenTask) => {
+    if (t.status === 'done') {
+      const plan = getHistory().find((p) => p.plan_id === t.plan_id)
+      removeTask(t.job_id)
+      refresh()
+      if (plan) openPlan(plan)
+      return
+    }
+    if (t.status === 'error') {
+      removeTask(t.job_id)
+      refresh()
+      Taro.navigateTo({ url: '/pages/questionnaire/questionnaire' })
+      return
+    }
+    Taro.showToast({ title: '仍在生成中，请稍候…', icon: 'none' })
+  }
+
+  const dismissTask = (t: GenTask) => {
+    removeTask(t.job_id)
+    refresh()
+  }
 
   const openPlan = (p: TravelPlan) => {
     if (openId) {
@@ -100,6 +164,44 @@ export default function Trips() {
         <Text className='trips-title'>我的行程</Text>
         <Text className='trips-sub'>每一次出发，都值得好好规划</Text>
       </View>
+
+      {/* 生成任务卡片：生成中 / 已生成 / 失败 */}
+      {tasks.map((t) => (
+        <View key={t.job_id} className={`task-card task-${t.status}`} onClick={() => onTaskClick(t)}>
+          <Text className='task-icon'>
+            {t.status === 'generating' ? '🕊️' : t.status === 'done' ? '✅' : '❌'}
+          </Text>
+          <View className='task-main'>
+            <Text className='task-title'>
+              {t.status === 'generating'
+                ? `正在生成「${t.dest}」行程…`
+                : t.status === 'done'
+                  ? `「${t.dest}」行程已生成`
+                  : `「${t.dest}」生成失败`}
+            </Text>
+            <Text className='task-sub'>
+              {t.status === 'generating'
+                ? '可以先去别处逛逛，完成后这里会提醒你'
+                : t.status === 'done'
+                  ? '点击查看完整方案'
+                  : '点击重新填写问卷'}
+            </Text>
+          </View>
+          {t.status === 'generating' ? (
+            <View className='task-spinner' />
+          ) : (
+            <Text
+              className='task-close'
+              onClick={(e) => {
+                e.stopPropagation()
+                dismissTask(t)
+              }}
+            >
+              ✕
+            </Text>
+          )}
+        </View>
+      ))}
 
       {history.length === 0 ? (
         <View className='trips-empty'>
