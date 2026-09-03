@@ -2,8 +2,10 @@
 
 .trips {
   min-height: 100vh;
+  box-sizing: border-box;
   background: $bg;
-  padding: 32px 32px 0;
+  padding: 32px 32px calc(160px + constant(safe-area-inset-bottom));
+  padding: 32px 32px calc(160px + env(safe-area-inset-bottom));
 }
 
 .trips-head {
@@ -137,4 +139,30 @@
   font-size: 40px;
   color: #C4CCD8;
   margin-left: 16px;
+}
+
+/* 悬浮新建按钮 */
+.fab {
+  position: fixed;
+  right: 40px;
+  bottom: calc(48px + constant(safe-area-inset-bottom));
+  bottom: calc(48px + env(safe-area-inset-bottom));
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $blue-light, $blue-deep);
+  box-shadow: 0 16px 36px rgba(46, 124, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+
+  &:active { opacity: 0.88; transform: scale(0.94); }
+}
+
+.fab-icon {
+  color: #fff;
+  font-size: 56px;
+  font-weight: 300;
+  line-height: 1;
 }

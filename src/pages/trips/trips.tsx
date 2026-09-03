@@ -17,6 +17,10 @@ export default function Trips() {
     Taro.navigateTo({ url: '/pages/preview/preview' })
   }
 
+  const createNew = () => {
+    Taro.navigateTo({ url: '/pages/questionnaire/questionnaire' })
+  }
+
   return (
     <View className='trips'>
       <View className='trips-head'>
@@ -29,7 +33,7 @@ export default function Trips() {
           <Text className='trips-empty-emoji'>🕊️</Text>
           <Text className='trips-empty-text'>还没有行程</Text>
           <Text className='trips-empty-sub'>让 AI 帮你规划第一次旅行吧</Text>
-          <View className='trips-empty-btn' onClick={() => Taro.switchTab({ url: '/pages/index/index' })}>
+          <View className='trips-empty-btn' onClick={createNew}>
             <Text className='trips-empty-btn-text'>去规划 →</Text>
           </View>
         </View>
@@ -54,7 +58,11 @@ export default function Trips() {
           </View>
         ))
       )}
-      <View style={{ height: '48px' }} />
+
+      {/* 悬浮新建按钮 */}
+      <View className='fab' onClick={createNew}>
+        <Text className='fab-icon'>＋</Text>
+      </View>
     </View>
   )
 }

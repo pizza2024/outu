@@ -19,7 +19,7 @@ export default function Launch() {
   const [loading, setLoading] = useState(false)
 
   const enter = () => {
-    Taro.reLaunch({ url: '/pages/index/index' })
+    Taro.reLaunch({ url: '/pages/trips/trips' })
   }
 
   /** 开发模式：跳过登录，用本地游客身份直接进入 */

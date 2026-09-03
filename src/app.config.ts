@@ -1,7 +1,6 @@
 export default defineAppConfig({
   pages: [
     'pages/launch/launch',
-    'pages/index/index',
     'pages/questionnaire/questionnaire',
     'pages/generating/generating',
     'pages/preview/preview',
@@ -22,12 +21,6 @@ export default defineAppConfig({
     selectedColor: '#2E7CF6',
     backgroundColor: '#FFFFFF',
     list: [
-      {
-        pagePath: 'pages/index/index',
-        text: '首页',
-        iconPath: './assets/tabbar/home.png',
-        selectedIconPath: './assets/tabbar/home-active.png'
-      },
       {
         pagePath: 'pages/trips/trips',
         text: '行程',
