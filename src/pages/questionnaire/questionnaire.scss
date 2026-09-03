@@ -529,6 +529,15 @@
   font-size: 32px;
   font-weight: 700;
   color: $text;
+  padding: 8px 20px;
+  border-radius: 12px;
+
+  &:active { background: $blue-bg; }
+}
+
+.cal-title-arrow {
+  font-size: 24px;
+  color: $blue;
 }
 
 .cal-week {
@@ -557,6 +566,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* 选年/选月视图：每行 4 个 */
+.cal-pick {
+  width: 25%;
+  height: 110px;
+  margin: 8px 0;
 }
 
 .cal-cell-range {

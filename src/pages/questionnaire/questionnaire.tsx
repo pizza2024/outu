@@ -59,6 +59,10 @@ export default function Questionnaire() {
   const now = new Date()
   const [calYear, setCalYear] = useState(now.getFullYear())
   const [calMonth, setCalMonth] = useState(now.getMonth()) // 0-based
+  /** 日历视图模式：day 选日期 / month 选月份 / year 选年份 */
+  const [calMode, setCalMode] = useState<'day' | 'month' | 'year'>('day')
+  /** 选年视图的起始年份（每页 12 年） */
+  const [yearBase, setYearBase] = useState(now.getFullYear())
   const [adults, setAdults] = useState(1)
   const [elderly, setElderly] = useState(0)
   const [children, setChildren] = useState(0)
@@ -103,6 +107,47 @@ export default function Questionnaire() {
     if (idx < minIdx || idx > minIdx + 6) return
     setCalYear(Math.floor(idx / 12))
     setCalMonth(idx % 12)
+  }
+
+  const MIN_IDX = now.getFullYear() * 12 + now.getMonth()
+  const MAX_IDX = MIN_IDX + 6
+
+  /** 头部 ‹ ›：按当前视图模式翻页（日=翻月，月=翻年，年=翻 12 年） */
+  const shiftHead = (dir: -1 | 1) => {
+    if (calMode === 'day') return shiftMonth(dir)
+    if (calMode === 'month') {
+      const y = calYear + dir
+      if (y < now.getFullYear() || y * 12 > MAX_IDX) return
+      setCalYear(y)
+      return
+    }
+    const b = yearBase + dir * 12
+    if (b + 11 < now.getFullYear() || b * 12 > MAX_IDX) return
+    setYearBase(b)
+  }
+
+  /** 点击头部标题：day → month → year 逐级切换 */
+  const cycleMode = () => {
+    if (calMode === 'day') setCalMode('month')
+    else if (calMode === 'month') {
+      setYearBase(calYear - (calYear % 12))
+      setCalMode('year')
+    } else setCalMode('day')
+  }
+
+  /** 选月份：超出可选范围（当月 ~ +6 个月）的禁用 */
+  const pickMonth = (m: number) => {
+    const idx = calYear * 12 + m
+    if (idx < MIN_IDX || idx > MAX_IDX) return
+    setCalMonth(m)
+    setCalMode('day')
+  }
+
+  /** 选年份：回到选月视图 */
+  const pickYear = (y: number) => {
+    if (y * 12 > MAX_IDX || y * 12 + 11 < MIN_IDX) return
+    setCalYear(y)
+    setCalMode('month')
   }
 
   /** 恢复草稿（模板预填 / 断点续填） */
@@ -217,37 +262,97 @@ export default function Questionnaire() {
       ...Array.from({ length: firstWeekday }, () => null),
       ...Array.from({ length: daysInMonth }, (_, i) => fmtLocal(calYear, calMonth, i + 1))
     ]
+
+    const headTitle =
+      calMode === 'day'
+        ? `${calYear} 年 ${calMonth + 1} 月`
+        : calMode === 'month'
+          ? `${calYear} 年`
+          : `${yearBase} - ${yearBase + 11}`
+
     return (
       <View className='cal'>
         <View className='cal-head'>
-          <Text className='cal-nav' onClick={() => shiftMonth(-1)}>‹</Text>
-          <Text className='cal-title'>{calYear} 年 {calMonth + 1} 月</Text>
-          <Text className='cal-nav' onClick={() => shiftMonth(1)}>›</Text>
+          <Text className='cal-nav' onClick={() => shiftHead(-1)}>‹</Text>
+          <Text className='cal-title' onClick={cycleMode}>
+            {headTitle}
+            {calMode !== 'year' && <Text className='cal-title-arrow'> ▾</Text>}
+          </Text>
+          <Text className='cal-nav' onClick={() => shiftHead(1)}>›</Text>
         </View>
-        <View className='cal-week'>
-          {WEEK_LABELS.map((w) => (
-            <Text key={w} className='cal-week-label'>{w}</Text>
-          ))}
-        </View>
-        <View className='cal-grid'>
-          {cells.map((d, i) => {
-            if (!d) return <View key={`e${i}`} className='cal-cell' />
-            const disabled = d < todayStr
-            const isDepart = d === depart
-            const isBack = d === back
-            const inRange = depart && back && d > depart && d < back
-            const cls = `cal-cell ${disabled ? 'cal-cell-disabled' : ''} ${inRange ? 'cal-cell-range' : ''} ${isDepart || isBack ? 'cal-cell-picked' : ''}`
-            return (
-              <View key={d} className={cls} onClick={() => !disabled && pickDate(d)}>
-                <Text className={`cal-day ${isDepart || isBack ? 'cal-day-picked' : ''} ${disabled ? 'cal-day-disabled' : ''}`}>
-                  {Number(d.slice(8))}
-                </Text>
-                {isDepart && <Text className='cal-tag'>出发</Text>}
-                {isBack && <Text className='cal-tag'>回程</Text>}
-              </View>
-            )
-          })}
-        </View>
+
+        {/* 选年视图 */}
+        {calMode === 'year' && (
+          <View className='cal-grid'>
+            {Array.from({ length: 12 }, (_, i) => yearBase + i).map((y) => {
+              const disabled = y * 12 > MAX_IDX || y * 12 + 11 < MIN_IDX
+              const on = y === calYear
+              return (
+                <View
+                  key={y}
+                  className={`cal-cell cal-pick ${disabled ? 'cal-cell-disabled' : ''} ${on ? 'cal-cell-picked' : ''}`}
+                  onClick={() => pickYear(y)}
+                >
+                  <Text className={`cal-day ${on ? 'cal-day-picked' : ''} ${disabled ? 'cal-day-disabled' : ''}`}>
+                    {y}
+                  </Text>
+                </View>
+              )
+            })}
+          </View>
+        )}
+
+        {/* 选月视图 */}
+        {calMode === 'month' && (
+          <View className='cal-grid'>
+            {Array.from({ length: 12 }, (_, m) => m).map((m) => {
+              const idx = calYear * 12 + m
+              const disabled = idx < MIN_IDX || idx > MAX_IDX
+              const on = m === calMonth
+              return (
+                <View
+                  key={m}
+                  className={`cal-cell cal-pick ${disabled ? 'cal-cell-disabled' : ''} ${on ? 'cal-cell-picked' : ''}`}
+                  onClick={() => pickMonth(m)}
+                >
+                  <Text className={`cal-day ${on ? 'cal-day-picked' : ''} ${disabled ? 'cal-day-disabled' : ''}`}>
+                    {m + 1}月
+                  </Text>
+                </View>
+              )
+            })}
+          </View>
+        )}
+
+        {/* 选日期视图 */}
+        {calMode === 'day' && (
+          <>
+            <View className='cal-week'>
+              {WEEK_LABELS.map((w) => (
+                <Text key={w} className='cal-week-label'>{w}</Text>
+              ))}
+            </View>
+            <View className='cal-grid'>
+              {cells.map((d, i) => {
+                if (!d) return <View key={`e${i}`} className='cal-cell' />
+                const disabled = d < todayStr
+                const isDepart = d === depart
+                const isBack = d === back
+                const inRange = depart && back && d > depart && d < back
+                const cls = `cal-cell ${disabled ? 'cal-cell-disabled' : ''} ${inRange ? 'cal-cell-range' : ''} ${isDepart || isBack ? 'cal-cell-picked' : ''}`
+                return (
+                  <View key={d} className={cls} onClick={() => !disabled && pickDate(d)}>
+                    <Text className={`cal-day ${isDepart || isBack ? 'cal-day-picked' : ''} ${disabled ? 'cal-day-disabled' : ''}`}>
+                      {Number(d.slice(8))}
+                    </Text>
+                    {isDepart && <Text className='cal-tag'>出发</Text>}
+                    {isBack && <Text className='cal-tag'>回程</Text>}
+                  </View>
+                )
+              })}
+            </View>
+          </>
+        )}
       </View>
     )
   }
