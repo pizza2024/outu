@@ -1,17 +1,20 @@
 @import '../../app.scss';
 
 .home {
-  height: 100vh;
+  min-height: 100vh;
   background: $bg;
-  display: flex;
-  flex-direction: column;
+  padding: 32px;
+  /* 底部给固定按钮栏留出空间 */
+  padding-bottom: calc(180px + env(safe-area-inset-bottom));
 }
 
 /* ===== 空行程状态 ===== */
 .home-empty {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 48px;
+  padding-bottom: 32px;
 }
 
 .empty-card {
@@ -44,7 +47,6 @@
 /* 主按钮 */
 .create-btn {
   margin-top: 48px;
-  width: 100%;
   background: linear-gradient(135deg, $blue-light, $blue-deep);
   border-radius: 999px;
   box-shadow: 0 12px 28px rgba(46, 124, 246, 0.32);
@@ -54,6 +56,10 @@
   &:active { opacity: 0.88; }
 }
 
+.home-empty .create-btn {
+  width: 100%;
+}
+
 .create-btn-text {
   color: #fff;
   font-size: 32px;
@@ -61,16 +67,7 @@
   letter-spacing: 4px;
 }
 
-/* ===== 行程列表状态 ===== */
-.trip-scroll {
-  flex: 1;
-  height: 0;
-}
-
-.trip-list {
-  padding: 32px 32px 0;
-}
-
+/* ===== 行程卡片（高度由内容撑开） ===== */
 .trip-card {
   background: #fff;
   border-radius: 24px;
@@ -78,22 +75,19 @@
   padding: 32px;
   margin-bottom: 24px;
 
-  &:active { background: $bg; }
+  &:active { background: #FAFBFE; }
 }
 
 .trip-route {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .trip-city {
   font-size: 36px;
   font-weight: 700;
   color: $text;
-  max-width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .trip-arrow {
@@ -105,7 +99,9 @@
 .trip-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   margin-top: 20px;
+  gap: 16px;
 }
 
 .trip-days {
@@ -117,7 +113,6 @@
 }
 
 .trip-budget {
-  margin-left: 16px;
   font-size: 24px;
   color: $orange;
   background: #FFF3EA;
@@ -132,10 +127,15 @@
   color: #B8C0CE;
 }
 
-/* 底部新建按钮 */
+/* 底部固定按钮栏（实底，不遮内容） */
 .home-footer {
-  padding: 16px 32px calc(24px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(244, 246, 251, 0), $bg 40%);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $bg;
+  border-top: 2px solid $line;
+  padding: 20px 32px calc(20px + env(safe-area-inset-bottom));
 
   .create-btn {
     margin-top: 0;

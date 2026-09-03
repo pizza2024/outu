@@ -1,15 +1,15 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { getHistory, savePlan } from '../../store/plan'
 import { TravelPlan } from '../../types'
 import './index.scss'
 
-/** 从方案里取出发地（交通信息的 leg 形如「上海 → 杭州」） */
+/** 从方案里取出发地（交通信息的 leg 形如「上海 → 杭州」），未知返回空串 */
 function originOf(p: TravelPlan): string {
   const leg = p.transportation?.intercity?.[0]?.leg || ''
-  const from = leg.split('→')[0]?.trim()
-  return from || '出发地'
+  const from = leg.split('→')[0]?.trim() || ''
+  return from === '出发地' ? '' : from
 }
 
 export default function Index() {
@@ -43,16 +43,21 @@ export default function Index() {
     )
   }
 
-  /* ===== 行程列表状态 ===== */
+  /* ===== 行程列表状态（页面原生滚动，按钮固定底部） ===== */
   return (
     <View className='home'>
-      <ScrollView className='trip-scroll' scrollY>
-        <View className='trip-list'>
-          {trips.map((p) => (
+      <View className='trip-list'>
+        {trips.map((p) => {
+          const from = originOf(p)
+          return (
             <View key={p.plan_id} className='trip-card' onClick={() => openPlan(p)}>
               <View className='trip-route'>
-                <Text className='trip-city'>{originOf(p)}</Text>
-                <Text className='trip-arrow'>→</Text>
+                {from ? (
+                  <>
+                    <Text className='trip-city'>{from}</Text>
+                    <Text className='trip-arrow'>→</Text>
+                  </>
+                ) : null}
                 <Text className='trip-city'>{p.summary.destination_label}</Text>
               </View>
               <View className='trip-meta'>
@@ -61,10 +66,9 @@ export default function Index() {
               </View>
               <Text className='trip-date'>{p.generated_at.slice(0, 10)} 创建</Text>
             </View>
-          ))}
-          <View style={{ height: '180px' }} />
-        </View>
-      </ScrollView>
+          )
+        })}
+      </View>
 
       <View className='home-footer'>
         <View className='create-btn' onClick={createNew}>
