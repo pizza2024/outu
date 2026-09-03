@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, Input, Button } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
-import { useState } from 'react'
-import { getPlan, recalcBudget, savePlan } from '../../store/plan'
-import { ScheduleItem, TravelPlan } from '../../types'
+import { useRef, useState } from 'react'
+import { getPlan, getTodoDone, recalcBudget, savePlan, toggleTodoDone } from '../../store/plan'
+import { ScheduleItem, TodoItem, TravelPlan } from '../../types'
 import './preview.scss'
 
 const ACT_ICON: Record<string, string> = {
@@ -10,16 +10,45 @@ const ACT_ICON: Record<string, string> = {
   accommodation: '🏨', shopping: '🛍️', entertainment: '🎡', rest: '☕'
 }
 
+const TODO_ICON: Record<string, string> = {
+  booking: '🎫', document: '🪪', packing: '🧳', other: '✅'
+}
+
+/** 本地时区 YYYY-MM-DD */
+function todayLocal(): string {
+  const n = new Date()
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`
+}
+
+function nowHM(): string {
+  const n = new Date()
+  return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`
+}
+
 export default function Preview() {
   const [plan, setPlan] = useState<TravelPlan | null>(null)
-  const [openDay, setOpenDay] = useState(0)
-  const [expanded, setExpanded] = useState(-1)
+  const [doneTodos, setDoneTodos] = useState<string[]>([])
+  const [expanded, setExpanded] = useState('')
   const [editing, setEditing] = useState(false)
-  const [adding, setAdding] = useState(false)
+  const [adding, setAdding] = useState(-1)
   const [newTitle, setNewTitle] = useState('')
+  /** scroll-into-view 目标锚点 */
+  const [anchor, setAnchor] = useState('')
+  /** 当前虚线锚点 id（旅行进行中才有值） */
+  const nowAnchor = useRef('')
 
   useDidShow(() => {
-    setPlan(getPlan())
+    const p = getPlan()
+    setPlan(p)
+    if (p) {
+      setDoneTodos(getTodoDone(p.plan_id))
+      nowAnchor.current = locateNow(p)
+      // 旅行进行中：渲染完成后自动滚动到当前时间；未开始则停留在顶部
+      if (nowAnchor.current) {
+        setAnchor('')
+        setTimeout(() => setAnchor(nowAnchor.current), 400)
+      }
+    }
   })
 
   useShareAppMessage(() => ({
@@ -35,6 +64,41 @@ export default function Preview() {
     )
   }
 
+  /** 计算当前时间在全程时间线中的位置，返回应滚动到的节点 id；不在旅行期间返回 '' */
+  function locateNow(p: TravelPlan): string {
+    const today = todayLocal()
+    const hm = nowHM()
+    const dayIdx = p.daily_plans.findIndex((d) => d.date === today)
+    if (dayIdx < 0) return ''
+    const schedule = p.daily_plans[dayIdx].schedule
+    for (let i = 0; i < schedule.length; i++) {
+      // 正在进行中的节点，或下一个即将开始的节点
+      if (hm <= (schedule[i].end_time || schedule[i].start_time)) return `n-${dayIdx}-${i}`
+    }
+    return `day-end-${dayIdx}`
+  }
+
+  const backToNow = () => {
+    if (!nowAnchor.current) return
+    setAnchor('')
+    setTimeout(() => setAnchor(nowAnchor.current), 50)
+  }
+
+  /* ===== 待办 ===== */
+  const todos: TodoItem[] = plan.preparation?.length
+    ? plan.preparation!
+    : [
+        { title: '预订往返大交通', detail: '锁定车票/机票', due_date: '', category: 'booking' },
+        { title: '预订酒店', detail: '确认住宿并支付', due_date: '', category: 'booking' },
+        { title: '预约热门景点', detail: '部分场馆需实名预约', due_date: '', category: 'booking' },
+        { title: '准备行李', detail: '按打包清单逐项核对', due_date: '', category: 'packing' }
+      ]
+
+  const toggleTodo = (key: string) => {
+    setDoneTodos(toggleTodoDone(plan.plan_id, key))
+  }
+
+  /* ===== 微调编辑 ===== */
   const update = (next: TravelPlan) => {
     recalcBudget(next)
     setPlan({ ...next })
@@ -68,20 +132,30 @@ export default function Preview() {
     }
     plan.daily_plans[dayIdx].schedule = [...plan.daily_plans[dayIdx].schedule, node]
     setNewTitle('')
-    setAdding(false)
+    setAdding(-1)
     update(plan)
   }
 
   const perPerson = plan.budget_breakdown.total_estimated
+  const inTrip = !!nowAnchor.current
+  const today = todayLocal()
+  const nowId = nowAnchor.current
 
   return (
     <View className='preview'>
-      <ScrollView className='preview-scroll' scrollY>
-        {/* 成功头 */}
-        <View className='done-head'>
-          <Text className='done-title'>你的专属行程已生成 🎉</Text>
+      <ScrollView
+        className='preview-scroll'
+        scrollY
+        scrollWithAnimation
+        scrollIntoView={anchor}
+        enhanced
+        showScrollbar={false}
+      >
+        {/* 头部概要 */}
+        <View className='done-head' id='top'>
+          <Text className='done-title'>{plan.summary.title}</Text>
           <View className='done-meta'>
-            <Text className='done-route'>{plan.summary.duration_label} · {plan.summary.destination_label}之旅</Text>
+            <Text className='done-route'>{plan.summary.duration_label} · {plan.summary.destination_label}</Text>
             <Text className='done-budget'>人均预算 ¥{perPerson.toLocaleString()}</Text>
           </View>
           {plan.summary.theme_tags.length > 0 && (
@@ -93,109 +167,148 @@ export default function Preview() {
           )}
         </View>
 
-        {/* 路线概览卡（地图占位） */}
-        <View className='map-card'>
-          <View className='map-route'>
-            {plan.daily_plans.slice(0, 4).map((d, i) => (
-              <View key={d.day} className='map-stop'>
-                <View className={`map-dot ${i === 0 ? 'map-dot-start' : ''}`}>
-                  <Text className='map-dot-num'>{d.day}</Text>
-                </View>
-                <Text className='map-stop-name'>{d.highlights[0] || d.theme}</Text>
-                {i < Math.min(plan.daily_plans.length, 4) - 1 && <View className='map-line' />}
-              </View>
-            ))}
+        {/* 行前待办：订票预约等事项，全部排在时间线最开头 */}
+        <View className='todo-card'>
+          <View className='todo-head'>
+            <Text className='todo-title'>🧾 出发前待办</Text>
+            <Text className='todo-progress'>{doneTodos.length}/{todos.length}</Text>
           </View>
-          <Text className='map-hint'>🗺️ {plan.summary.destination_label} · 路线概览</Text>
+          {todos.map((t, i) => {
+            const key = `${i}-${t.title}`
+            const done = doneTodos.includes(key)
+            return (
+              <View key={key} className={`todo-item ${done ? 'todo-item-done' : ''}`} onClick={() => toggleTodo(key)}>
+                <View className={`todo-check ${done ? 'todo-check-done' : ''}`}>
+                  {done && <Text className='todo-check-mark'>✓</Text>}
+                </View>
+                <View className='todo-main'>
+                  <Text className={`todo-name ${done ? 'todo-name-done' : ''}`}>
+                    {TODO_ICON[t.category] || TODO_ICON.other} {t.title}
+                  </Text>
+                  {!!t.detail && <Text className='todo-detail'>{t.detail}</Text>}
+                </View>
+                {!!t.due_date && <Text className='todo-due'>{t.due_date.slice(5)} 前</Text>}
+              </View>
+            )
+          })}
         </View>
 
-        {/* 每日行程卡 */}
-        {plan.daily_plans.map((d, dayIdx) => {
-          const open = openDay === dayIdx
-          const firstSpot = d.schedule.find((s) => s.activity_type === 'sightseeing')
-          return (
-            <View key={d.day} className='day-card'>
-              <View className='day-head' onClick={() => { setOpenDay(open ? -1 : dayIdx); setExpanded(-1) }}>
-                <View className='day-head-main'>
-                  <View className='day-badge'><Text className='day-badge-text'>DAY {d.day}</Text></View>
-                  <Text className='day-theme'>{d.theme}</Text>
-                  <Text className='day-spots'>{d.highlights.join(' → ')}</Text>
-                  <Text className='day-date'>{d.date}</Text>
+        {/* 全程时间线（所有天连续一条竖线，可上下滑动） */}
+        <View className='timeline'>
+          {plan.daily_plans.map((d, dayIdx) => {
+            const isToday = d.date === today
+            return (
+              <View key={d.day} className='tl-day'>
+                {/* 天标记 */}
+                <View className='tl-day-head' id={`day-${dayIdx}`}>
+                  <View className={`tl-day-dot ${isToday ? 'tl-day-dot-today' : ''}`} />
+                  <View className='tl-day-info'>
+                    <Text className={`tl-day-title ${isToday ? 'tl-day-title-today' : ''}`}>
+                      Day {d.day} · {d.theme}
+                    </Text>
+                    <Text className='tl-day-date'>{d.date}{isToday ? ' · 今天' : ''}</Text>
+                  </View>
                 </View>
-                <View className='day-thumb'>
-                  <Text className='day-thumb-emoji'>{ACT_ICON[firstSpot?.activity_type || 'sightseeing']}</Text>
-                </View>
-              </View>
 
-              {open && (
-                <View className='day-detail'>
-                  {d.schedule.map((s, i) => (
-                    <View key={i} className='node'>
-                      <View className='node-time'>
-                        <Text className='node-start'>{s.start_time}</Text>
-                        <View className='node-line' />
-                      </View>
-                      <View className='node-card' onClick={() => !editing && setExpanded(expanded === i ? -1 : i)}>
-                        <View className='node-head'>
-                          <Text className='node-icon'>{ACT_ICON[s.activity_type] || '📌'}</Text>
-                          <Text className='node-title'>{s.title}</Text>
-                          {s.estimated_cost.amount > 0 && (
-                            <Text className='node-cost'>¥{s.estimated_cost.amount}</Text>
-                          )}
-                        </View>
-                        {expanded === i && (
-                          <View className='node-detail'>
-                            <Text className='node-desc'>{s.description}</Text>
-                            {!!s.location.address && <Text className='node-sub'>📍 {s.location.address}</Text>}
-                            {!!s.tips && <Text className='node-tips'>💡 {s.tips}</Text>}
-                          </View>
-                        )}
-                        {editing && (
-                          <View className='node-tools'>
-                            <Text className='tool' onClick={() => move(dayIdx, i, -1)}>↑ 上移</Text>
-                            <Text className='tool' onClick={() => move(dayIdx, i, 1)}>↓ 下移</Text>
-                            <Text className='tool tool-danger' onClick={() => remove(dayIdx, i)}>✕ 删除</Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  ))}
-
-                  {editing && (
-                    <View className='add-area'>
-                      {adding ? (
-                        <View className='add-form'>
-                          <Input
-                            className='add-input'
-                            placeholder='输入自定义行程，如：傍晚去夜市'
-                            placeholderClass='add-ph'
-                            value={newTitle}
-                            onInput={(e) => setNewTitle(e.detail.value)}
-                          />
-                          <View className='add-ok' onClick={() => addNode(dayIdx)}>
-                            <Text className='add-ok-text'>添加</Text>
-                          </View>
-                        </View>
-                      ) : (
-                        <View className='add-trigger' onClick={() => setAdding(true)}>
-                          <Text className='add-trigger-text'>＋ 添加自定义节点</Text>
+                {/* 当日时间节点 */}
+                {d.schedule.map((s, i) => {
+                  const nodeId = `n-${dayIdx}-${i}`
+                  const isNow = nowId === nodeId
+                  const open = expanded === nodeId
+                  return (
+                    <View key={nodeId}>
+                      {isNow && (
+                        <View className='now-line' id='now-line'>
+                          <Text className='now-label'>现在 {nowHM()}</Text>
+                          <View className='now-dash' />
                         </View>
                       )}
+                      <View className='tl-node' id={nodeId}>
+                        <View className='tl-time'>
+                          <Text className='tl-time-text'>{s.start_time}</Text>
+                        </View>
+                        <View className='tl-track'>
+                          <View className='tl-node-dot' />
+                        </View>
+                        <View className='tl-card' onClick={() => !editing && setExpanded(open ? '' : nodeId)}>
+                          <View className='tl-card-head'>
+                            <Text className='tl-icon'>{ACT_ICON[s.activity_type] || '📌'}</Text>
+                            <Text className='tl-name'>{s.title}</Text>
+                            {s.estimated_cost.amount > 0 && (
+                              <Text className='tl-cost'>¥{s.estimated_cost.amount}</Text>
+                            )}
+                          </View>
+                          {open && (
+                            <View className='tl-detail'>
+                              <Text className='tl-time-range'>{s.start_time} - {s.end_time}</Text>
+                              {!!s.description && <Text className='tl-desc'>{s.description}</Text>}
+                              {!!s.location.address && <Text className='tl-sub'>📍 {s.location.address}</Text>}
+                              {!!s.tips && <Text className='tl-tips'>💡 {s.tips}</Text>}
+                            </View>
+                          )}
+                          {editing && (
+                            <View className='node-tools'>
+                              <Text className='tool' onClick={() => move(dayIdx, i, -1)}>↑ 上移</Text>
+                              <Text className='tool' onClick={() => move(dayIdx, i, 1)}>↓ 下移</Text>
+                              <Text className='tool tool-danger' onClick={() => remove(dayIdx, i)}>✕ 删除</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
                     </View>
-                  )}
-                </View>
-              )}
-            </View>
-          )
-        })}
+                  )
+                })}
 
-        <View style={{ height: '200px' }} />
+                {/* 当前时间晚于当天所有节点时，虚线落在当天末尾 */}
+                {nowId === `day-end-${dayIdx}` && (
+                  <View className='now-line' id='now-line'>
+                    <Text className='now-label'>现在 {nowHM()}</Text>
+                    <View className='now-dash' />
+                  </View>
+                )}
+
+                {/* 编辑模式：添加自定义节点 */}
+                {editing && (
+                  <View className='add-area'>
+                    {adding === dayIdx ? (
+                      <View className='add-form'>
+                        <Input
+                          className='add-input'
+                          placeholder='输入自定义行程，如：傍晚去夜市'
+                          placeholderClass='add-ph'
+                          value={newTitle}
+                          onInput={(e) => setNewTitle(e.detail.value)}
+                        />
+                        <View className='add-ok' onClick={() => addNode(dayIdx)}>
+                          <Text className='add-ok-text'>添加</Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <View className='add-trigger' onClick={() => setAdding(dayIdx)}>
+                        <Text className='add-trigger-text'>＋ 添加自定义节点</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            )
+          })}
+        </View>
+
+        <View style={{ height: '220px' }} />
       </ScrollView>
+
+      {/* 旅行进行中：回到当前时间 */}
+      {inTrip && (
+        <View className='now-fab' onClick={backToNow}>
+          <Text className='now-fab-text'>回到当前</Text>
+        </View>
+      )}
 
       {/* 底部操作栏 */}
       <View className='actions'>
         <View className='actions-row'>
-          <View className={`act ${editing ? 'act-on' : ''}`} onClick={() => setEditing(!editing)}>
+          <View className={`act ${editing ? 'act-on' : ''}`} onClick={() => { setEditing(!editing); setAdding(-1) }}>
             <Text className={`act-text ${editing ? 'act-text-on' : ''}`}>{editing ? '✓ 完成' : '✏️ 微调'}</Text>
           </View>
           <View className='act act-primary' onClick={() => Taro.showToast({ title: '已保存到行程', icon: 'success' })}>

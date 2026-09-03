@@ -54,6 +54,21 @@ export function deleteHistory(planId: string) {
   Taro.setStorageSync(HISTORY_KEY, list.filter((p) => p.plan_id !== planId))
 }
 
+/* ===== 行前待办完成状态（按方案 id 持久化） ===== */
+const TODO_KEY = 'outu_todo_done'
+export function getTodoDone(planId: string): string[] {
+  const all = Taro.getStorageSync(TODO_KEY) || {}
+  return all[planId] || []
+}
+export function toggleTodoDone(planId: string, todoKey: string): string[] {
+  const all = Taro.getStorageSync(TODO_KEY) || {}
+  const list: string[] = all[planId] || []
+  const next = list.includes(todoKey) ? list.filter((k) => k !== todoKey) : [...list, todoKey]
+  all[planId] = next
+  Taro.setStorageSync(TODO_KEY, all)
+  return next
+}
+
 /* ===== 预算实时重算（微调后调用） ===== */
 export function recalcBudget(plan: TravelPlan): TravelPlan {
   let food = 0
@@ -138,6 +153,12 @@ export function mockPlan(req: TravelRequest): TravelPlan {
       theme_tags: req.preferences.styles,
       cover_image_url: ''
     },
+    preparation: [
+      { title: '预订往返大交通', detail: `锁定${req.origin?.city || '出发地'}到${city}的车票/机票`, due_date: '', category: 'booking' as const },
+      { title: '预订酒店', detail: `${city}市中心，共${nights}晚`, due_date: '', category: 'booking' as const },
+      { title: '预约热门景点门票', detail: '部分场馆需实名预约', due_date: '', category: 'booking' as const },
+      { title: '准备行李', detail: '按打包清单逐项核对', due_date: '', category: 'packing' as const }
+    ],
     daily_plans,
     transportation: {
       intercity: [{

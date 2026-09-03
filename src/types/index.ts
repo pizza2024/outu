@@ -42,6 +42,15 @@ export interface TravelRequest {
   template_id?: string
 }
 
+/** 行前待办事项 */
+export interface TodoItem {
+  title: string
+  detail: string
+  /** 建议完成日期 YYYY-MM-DD */
+  due_date: string
+  category: 'booking' | 'document' | 'packing' | 'other'
+}
+
 /** 行程方案 JSON（3.2） */
 export interface TravelPlan {
   plan_id: string
@@ -54,6 +63,8 @@ export interface TravelPlan {
     theme_tags: string[]
     cover_image_url: string
   }
+  /** 出发前待办清单（订票、预约、证件、行李等），时间线最开头展示 */
+  preparation?: TodoItem[]
   daily_plans: DailyPlan[]
   transportation: {
     intercity: Array<{

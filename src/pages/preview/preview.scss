@@ -58,253 +58,310 @@
   margin-bottom: 8px;
 }
 
-/* ===== 路线概览卡 ===== */
-.map-card {
+/* ===== 行前待办 ===== */
+.todo-card {
   margin: 24px 32px 0;
-  background: linear-gradient(135deg, #DCEBFF, #EEF5FF);
+  background: #fff;
   border-radius: 24px;
   box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
-  padding: 40px 32px 28px;
-  overflow: hidden;
+  padding: 28px;
 }
 
-.map-route {
+.todo-head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
-}
-
-.map-stop {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  position: relative;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 2px solid $line;
 }
 
-.map-dot {
-  width: 56px;
-  height: 56px;
+.todo-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: $text;
+}
+
+.todo-progress {
+  font-size: 24px;
+  color: $blue;
+  font-weight: 600;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid $line;
+
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+  &:active { opacity: 0.8; }
+}
+
+.todo-check {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #fff;
-  border: 3px solid $blue;
+  border: 3px solid #C4CCD8;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  flex-shrink: 0;
 }
 
-.map-dot-start {
+.todo-check-done {
+  border-color: $blue;
   background: $blue;
 }
 
-.map-dot-num {
+.todo-check-mark {
+  color: #fff;
   font-size: 24px;
   font-weight: 700;
-  color: $blue;
 }
 
-.map-dot-start .map-dot-num {
-  color: #fff;
-}
-
-.map-stop-name {
-  margin-top: 12px;
-  font-size: 20px;
-  color: $text;
-  max-width: 140px;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.map-line {
-  position: absolute;
-  top: 28px;
-  left: calc(50% + 32px);
-  right: calc(-50% + 32px);
-  height: 4px;
-  border-radius: 2px;
-  background: repeating-linear-gradient(90deg, $blue 0, $blue 12px, transparent 12px, transparent 22px);
-  opacity: 0.5;
-}
-
-.map-hint {
-  display: block;
-  margin-top: 24px;
-  text-align: center;
-  font-size: 22px;
-  color: $sub;
-}
-
-/* ===== 每日行程卡 ===== */
-.day-card {
-  margin: 24px 32px 0;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.06);
-  overflow: hidden;
-}
-
-.day-head {
-  display: flex;
-  align-items: center;
-  padding: 28px;
-
-  &:active { background: $bg; }
-}
-
-.day-head-main {
+.todo-main {
   flex: 1;
   min-width: 0;
+  margin-left: 20px;
 }
 
-.day-badge {
-  display: inline-block;
-  background: $blue;
-  border-radius: 8px;
-  padding: 4px 14px;
-}
-
-.day-badge-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
-}
-
-.day-theme {
+.todo-name {
   display: block;
-  margin-top: 12px;
-  font-size: 32px;
-  font-weight: 700;
-  color: $text;
-}
-
-.day-spots {
-  display: block;
-  margin-top: 8px;
-  font-size: 24px;
-  color: $sub;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.day-date {
-  display: block;
-  margin-top: 8px;
-  font-size: 22px;
-  color: #B8C0CE;
-}
-
-.day-thumb {
-  width: 120px;
-  height: 120px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, $blue-light, $blue-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 24px;
-  flex-shrink: 0;
-}
-
-.day-thumb-emoji {
-  font-size: 56px;
-}
-
-/* ===== 时间轴 ===== */
-.day-detail {
-  padding: 0 28px 28px;
-  border-top: 2px solid $line;
-}
-
-.node {
-  display: flex;
-  margin-top: 24px;
-}
-
-.node-time {
-  width: 88px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.node-start {
-  font-size: 26px;
-  font-weight: 600;
-  color: $blue;
-}
-
-.node-line {
-  flex: 1;
-  width: 2px;
-  background: $line;
-  margin-top: 8px;
-}
-
-.node-card {
-  flex: 1;
-  background: $bg;
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 4px;
-
-  &:active { opacity: 0.9; }
-}
-
-.node-head {
-  display: flex;
-  align-items: center;
-}
-
-.node-icon {
-  font-size: 32px;
-  margin-right: 16px;
-}
-
-.node-title {
-  flex: 1;
   font-size: 28px;
   font-weight: 600;
   color: $text;
 }
 
-.node-cost {
+.todo-name-done {
+  color: #B8C0CE;
+  text-decoration: line-through;
+}
+
+.todo-detail {
+  display: block;
+  margin-top: 6px;
+  font-size: 24px;
+  color: $sub;
+}
+
+.todo-due {
+  flex-shrink: 0;
+  margin-left: 16px;
+  font-size: 22px;
+  color: $orange;
+  background: #FFF3E8;
+  border-radius: 999px;
+  padding: 4px 16px;
+}
+
+/* ===== 全程时间线 ===== */
+.timeline {
+  margin: 32px 32px 0;
+}
+
+.tl-day {
+  position: relative;
+  padding-left: 150px;
+}
+
+/* 贯穿整天的竖线 */
+.tl-day::before {
+  content: '';
+  position: absolute;
+  left: 118px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: $line;
+}
+
+.tl-day-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.tl-day-dot {
+  position: absolute;
+  left: -41px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid $blue;
+  box-sizing: border-box;
+}
+
+.tl-day-dot-today {
+  background: $blue;
+  box-shadow: 0 0 0 8px rgba(46, 124, 246, 0.18);
+}
+
+.tl-day-title {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  color: $text;
+}
+
+.tl-day-title-today {
+  color: $blue;
+}
+
+.tl-day-date {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: #B8C0CE;
+}
+
+.tl-node {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 0;
+}
+
+.tl-time {
+  position: absolute;
+  left: -150px;
+  width: 96px;
+  text-align: right;
+  padding-top: 26px;
+}
+
+.tl-time-text {
+  font-size: 26px;
+  font-weight: 600;
+  color: $blue;
+}
+
+.tl-track {
+  position: absolute;
+  left: -38px;
+  top: 34px;
+}
+
+.tl-node-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: $blue-light;
+  border: 3px solid #fff;
+}
+
+.tl-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(30, 64, 140, 0.05);
+  padding: 24px;
+
+  &:active { opacity: 0.9; }
+}
+
+.tl-card-head {
+  display: flex;
+  align-items: center;
+}
+
+.tl-icon {
+  font-size: 32px;
+  margin-right: 16px;
+}
+
+.tl-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: $text;
+}
+
+.tl-cost {
   font-size: 26px;
   color: $orange;
   font-weight: 600;
 }
 
-.node-detail {
+.tl-detail {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 2px dashed $line;
 }
 
-.node-desc {
+.tl-time-range {
   display: block;
+  font-size: 24px;
+  color: $blue;
+  font-weight: 600;
+}
+
+.tl-desc {
+  display: block;
+  margin-top: 12px;
   font-size: 26px;
   color: $text;
   line-height: 1.6;
 }
 
-.node-sub {
+.tl-sub {
   display: block;
   margin-top: 12px;
   font-size: 24px;
   color: $sub;
 }
 
-.node-tips {
+.tl-tips {
   display: block;
   margin-top: 12px;
   font-size: 24px;
+  color: $blue;
+}
+
+/* ===== 当前时间虚线 ===== */
+.now-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.now-label {
+  position: absolute;
+  left: -150px;
+  width: 96px;
+  text-align: right;
+  font-size: 22px;
+  font-weight: 700;
+  color: #E8503A;
+}
+
+.now-dash {
+  flex: 1;
+  height: 0;
+  border-top: 3px dashed #E8503A;
+}
+
+/* 回到当前时间按钮 */
+.now-fab {
+  position: fixed;
+  right: 32px;
+  bottom: calc(240px + env(safe-area-inset-bottom));
+  background: #fff;
+  border: 2px solid $blue;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(46, 124, 246, 0.25);
+  padding: 16px 32px;
+  z-index: 100;
+
+  &:active { opacity: 0.85; }
+}
+
+.now-fab-text {
+  font-size: 26px;
+  font-weight: 600;
   color: $blue;
 }
 
