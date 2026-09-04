@@ -34,6 +34,11 @@ export default function Trips() {
     const pending = getTasks().filter((t) => t.status === 'generating')
     if (!pending.length) return
     for (const t of pending) {
+      // 超时兜底：超过 8 分钟未完成的任务标记失败（后端重启丢任务、LLM 挂起等情况）
+      if (Date.now() - t.created_at > 8 * 60 * 1000) {
+        updateTask(t.job_id, { status: 'error', error: '生成超时，请重新生成' })
+        continue
+      }
       try {
         const r = await apiPost<{ status: string; plan?: TravelPlan; error?: string }>(
           '/api/plan/result',
