@@ -84,7 +84,11 @@ export default function Generating() {
         if (!plan && !failReason) failReason = '生成超时，请重试'
       }
     } catch (e: any) {
-      failReason = e?.errMsg || e?.message || String(e)
+      const raw = e?.errMsg || e?.message || String(e)
+      // 开发模式下请求直接失败，多半是本地后端没启动，给出明确指引
+      failReason = IS_DEV && /request:fail|fail timeout|ECONNREFUSED/i.test(raw)
+        ? `无法连接本地后端 ${'127.0.0.1:3100'}，请先在 outu-server 目录执行 npm start（${raw}）`
+        : raw
     }
 
     // 降级：本地示例方案
