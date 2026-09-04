@@ -36,6 +36,8 @@ export default function Preview() {
   const [anchor, setAnchor] = useState('')
   /** 当前虚线锚点 id（旅行进行中才有值） */
   const nowAnchor = useRef('')
+  /** 进行中节点 id */
+  const ongoingId = useRef('')
 
   useDidShow(() => {
     const p = getPlan()
@@ -43,6 +45,7 @@ export default function Preview() {
     if (p) {
       setDoneTodos(getTodoDone(p.plan_id))
       nowAnchor.current = locateNow(p)
+      ongoingId.current = locateOngoing(p)
       // 旅行进行中：渲染完成后自动滚动到当前时间；未开始则停留在顶部
       if (nowAnchor.current) {
         setAnchor('')
@@ -72,10 +75,24 @@ export default function Preview() {
     if (dayIdx < 0) return ''
     const schedule = p.daily_plans[dayIdx].schedule
     for (let i = 0; i < schedule.length; i++) {
-      // 正在进行中的节点，或下一个即将开始的节点
-      if (hm <= (schedule[i].end_time || schedule[i].start_time)) return `n-${dayIdx}-${i}`
+      // 虚线贴在「第一个还没开始的节点」之前
+      if (schedule[i].start_time > hm) return `n-${dayIdx}-${i}`
     }
     return `day-end-${dayIdx}`
+  }
+
+  /** 正在进行中的节点 id（start <= now <= end），用于高亮；没有则返回 '' */
+  function locateOngoing(p: TravelPlan): string {
+    const today = todayLocal()
+    const hm = nowHM()
+    const dayIdx = p.daily_plans.findIndex((d) => d.date === today)
+    if (dayIdx < 0) return ''
+    const schedule = p.daily_plans[dayIdx].schedule
+    for (let i = 0; i < schedule.length; i++) {
+      const s = schedule[i]
+      if (s.start_time <= hm && hm <= (s.end_time || s.start_time)) return `n-${dayIdx}-${i}`
+    }
+    return ''
   }
 
   const backToNow = () => {
@@ -223,6 +240,7 @@ export default function Preview() {
                 {d.schedule.map((s, i) => {
                   const nodeId = `n-${dayIdx}-${i}`
                   const isNow = nowId === nodeId
+                  const ongoing = ongoingId.current === nodeId
                   const open = expanded === nodeId
                   return (
                     <View key={nodeId}>
@@ -237,12 +255,13 @@ export default function Preview() {
                           <Text className='tl-time-text'>{s.start_time}</Text>
                         </View>
                         <View className='tl-track'>
-                          <View className='tl-node-dot' />
+                          <View className={`tl-node-dot ${ongoing ? 'tl-node-dot-on' : ''}`} />
                         </View>
-                        <View className='tl-card' onClick={() => !editing && setExpanded(open ? '' : nodeId)}>
+                        <View className={`tl-card ${ongoing ? 'tl-card-on' : ''}`} onClick={() => !editing && setExpanded(open ? '' : nodeId)}>
                           <View className='tl-card-head'>
                             <Text className='tl-icon'>{ACT_ICON[s.activity_type] || '📌'}</Text>
                             <Text className='tl-name'>{s.title}</Text>
+                            {ongoing && <Text className='tl-ongoing'>进行中</Text>}
                             {s.estimated_cost.amount > 0 && (
                               <Text className='tl-cost'>¥{s.estimated_cost.amount}</Text>
                             )}

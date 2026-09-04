@@ -290,6 +290,30 @@
   border: 3px solid #fff;
 }
 
+.tl-node-dot-on {
+  background: #E8503A;
+  box-shadow: 0 0 0 6px rgba(232, 80, 58, 0.15);
+}
+
+/* 进行中节点高亮 */
+.tl-card-on {
+  background: $blue-bg;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin: 6px 0;
+}
+
+.tl-ongoing {
+  flex-shrink: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  background: #E8503A;
+  border-radius: 999px;
+  padding: 2px 14px;
+  margin-right: 12px;
+}
+
 .tl-card {
   flex: 1;
   min-width: 0;
