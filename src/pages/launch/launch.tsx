@@ -1,6 +1,6 @@
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IS_DEV } from '../../config'
 import { getUser, saveUser, uuid } from '../../store/plan'
 import { apiPost } from '../../utils/api'
@@ -17,6 +17,16 @@ interface LoginResult {
 export default function Launch() {
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
+  /** 启动检查登录态中：已登录直接进首页，避免每次冷启动都停在登录页 */
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    if (getUser()) {
+      Taro.reLaunch({ url: '/pages/trips/trips' })
+    } else {
+      setChecking(false)
+    }
+  }, [])
 
   const enter = () => {
     Taro.reLaunch({ url: '/pages/trips/trips' })
@@ -72,6 +82,19 @@ export default function Launch() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // 登录态检查中：显示品牌页但不显示登录按钮，避免闪烁
+  if (checking) {
+    return (
+      <View className='launch'>
+        <View className='brand'>
+          <Image className='logo' src={logo} mode='aspectFit' />
+          <Text className='name'>鸥途</Text>
+          <Text className='slogan'>不懂 AI，也能拥有完美旅行</Text>
+        </View>
+      </View>
+    )
   }
 
   return (
