@@ -625,3 +625,48 @@
 .people-section {
   margin-top: 8px;
 }
+
+/* ===== 官方模板横滑 ===== */
+.tpl-row {
+  margin: 20px -32px 8px;
+  padding: 4px 32px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.tpl-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 160px;
+  background: #fff;
+  border: 2px solid $line;
+  border-radius: 20px;
+  padding: 20px 0;
+  margin-right: 20px;
+  box-shadow: 0 6px 16px rgba(30, 64, 140, 0.05);
+
+  &:active { opacity: 0.85; }
+}
+
+.tpl-card-on {
+  border-color: $blue;
+  background: $blue-bg;
+}
+
+.tpl-emoji {
+  font-size: 44px;
+}
+
+.tpl-city {
+  margin-top: 10px;
+  font-size: 26px;
+  font-weight: 700;
+  color: $text;
+}
+
+.tpl-title {
+  margin-top: 4px;
+  font-size: 20px;
+  color: $sub;
+}

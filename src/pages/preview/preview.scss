@@ -559,6 +559,72 @@
   opacity: 0.6;
 }
 
+/* ===== 分享海报 ===== */
+.poster-btn {
+  margin-top: 12px;
+  text-align: center;
+  padding: 6px 0;
+
+  &:active { opacity: 0.7; }
+}
+
+.poster-btn-text {
+  font-size: 26px;
+  color: $blue;
+  font-weight: 600;
+}
+
+.poster-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.poster-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.poster-img {
+  width: 560px;
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+
+.poster-hint {
+  margin-top: 24px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.poster-close {
+  margin-top: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  padding: 12px 48px;
+
+  &:active { opacity: 0.7; }
+}
+
+.poster-close-text {
+  font-size: 26px;
+  color: #fff;
+}
+
+/* 隐藏画布（离屏绘制） */
+.poster-canvas {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 300px;
+  height: 480px;
+}
+
 /* 空状态 */
 .empty {
   min-height: 100vh;

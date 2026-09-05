@@ -1,7 +1,8 @@
-import { View, Text, Input, Textarea } from '@tarojs/components'
+import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useEffect, useState } from 'react'
 import { clearDraft, getDraft, getUser, saveDraft, uuid } from '../../store/plan'
+import { TEMPLATES, TripTemplate } from '../../store/templates'
 import { TravelRequest } from '../../types'
 import './questionnaire.scss'
 
@@ -165,6 +166,16 @@ export default function Questionnaire() {
   const toggle = (list: string[], setList: (v: string[]) => void, item: string) => {
     setList(list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
   }
+
+  /** 套用官方模板：预填目的地/偏好/节奏，日期仍需用户自选 */
+  const applyTemplate = (t: TripTemplate) => {
+    setDest(t.city)
+    setStyles(t.styles)
+    setPace(t.pace)
+    setTplId(t.id)
+    Taro.showToast({ title: `已填入「${t.title}」模板`, icon: 'none' })
+  }
+  const [tplId, setTplId] = useState('')
 
   const stepValid = (): boolean => {
     if (step === 1) return origin.trim().length > 0 && dest.trim().length > 0 && totalDays >= 1
@@ -372,6 +383,17 @@ export default function Questionnaire() {
         {step === 1 && (
           <View>
             <Text className='title'>从哪里出发，想去哪里？</Text>
+
+            {/* 官方模板：一键预填 */}
+            <ScrollView className='tpl-row' scrollX enhanced showScrollbar={false}>
+              {TEMPLATES.map((t) => (
+                <View key={t.id} className={`tpl-card ${tplId === t.id ? 'tpl-card-on' : ''}`} onClick={() => applyTemplate(t)}>
+                  <Text className='tpl-emoji'>{t.emoji}</Text>
+                  <Text className='tpl-city'>{t.city}{t.days}日</Text>
+                  <Text className='tpl-title'>{t.title}</Text>
+                </View>
+              ))}
+            </ScrollView>
 
             {/* 出发地 + 目的地 */}
             <View className='city-card'>

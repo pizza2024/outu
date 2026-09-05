@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Input, Button, Image } from '@tarojs/components'
+import { View, Text, ScrollView, Input, Button, Image, Canvas } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { useRef, useState } from 'react'
 import { getPlan, getTodoDone, recalcBudget, savePlan, toggleTodoDone } from '../../store/plan'
+import { apiPost } from '../../utils/api'
 import { ScheduleItem, TodoItem, TravelPlan } from '../../types'
 import './preview.scss'
 
@@ -34,6 +35,10 @@ export default function Preview() {
   const [newTitle, setNewTitle] = useState('')
   /** scroll-into-view 目标锚点 */
   const [anchor, setAnchor] = useState('')
+  /** 海报弹层 */
+  const [posterUrl, setPosterUrl] = useState('')
+  const [posterOpen, setPosterOpen] = useState(false)
+  const [posterLoading, setPosterLoading] = useState(false)
   /** 当前虚线锚点 id（旅行进行中才有值） */
   const nowAnchor = useRef('')
   /** 进行中节点 id */
@@ -156,6 +161,137 @@ export default function Preview() {
     setNewTitle('')
     setAdding(-1)
     update(plan)
+  }
+
+  /* ===== 分享海报：canvas 绘制 600x960（逻辑 300x480，按 dpr 放大保证清晰） ===== */
+  const makePoster = async () => {
+    if (posterLoading || !plan) return
+    setPosterLoading(true)
+    try {
+      // 1) 取小程序码（未发布的小程序接口会报错，降级为无码海报）
+      let qrPath = ''
+      try {
+        const env = Taro.getAccountInfoSync().miniProgram.envVersion
+        const qr = await apiPost<{ ok: boolean; image?: string; error?: string }>(
+          '/api/poster/qrcode',
+          { scene: plan.plan_id.slice(0, 32), env_version: env === 'release' ? 'release' : 'trial' }
+        )
+        if (qr?.ok && qr.image) {
+          qrPath = `${(Taro as any).env?.USER_DATA_PATH}/qr_${Date.now()}.png`
+          await new Promise<void>((resolve, reject) => {
+            Taro.getFileSystemManager().writeFile({
+              filePath: qrPath, data: qr.image!, encoding: 'base64',
+              success: () => resolve(), fail: reject
+            })
+          })
+        }
+      } catch { /* 无码降级 */ }
+
+      // 2) 绘制
+      const node: any = await new Promise((resolve, reject) => {
+        Taro.createSelectorQuery()
+          .select('#posterCv')
+          .fields({ node: true, size: true } as any)
+          .exec((res) => (res?.[0]?.node ? resolve(res[0].node) : reject(new Error('canvas 未就绪'))))
+      })
+      const dpr = Taro.getWindowInfo().pixelRatio || 2
+      const W = 300
+      const H = 480
+      node.width = W * dpr
+      node.height = H * dpr
+      const ctx = node.getContext('2d')
+      ctx.scale(dpr, dpr)
+
+      // 白底
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, W, H)
+
+      // 顶部蓝色渐变区
+      const grad = ctx.createLinearGradient(0, 0, W, 170)
+      grad.addColorStop(0, '#4DA3FF')
+      grad.addColorStop(1, '#1F63E0')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, W, 170)
+
+      const ellipsize = (text: string, maxW: number, font: string): string => {
+        ctx.font = font
+        if (ctx.measureText(text).width <= maxW) return text
+        let t = text
+        while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1)
+        return t + '…'
+      }
+
+      // 头部文案
+      ctx.fillStyle = '#FFFFFF'
+      ctx.textBaseline = 'middle'
+      ctx.textAlign = 'left'
+      ctx.font = 'bold 26px sans-serif'
+      ctx.fillText(ellipsize(plan.summary.destination_label, 200, 'bold 26px sans-serif'), 20, 56)
+      ctx.font = '16px sans-serif'
+      ctx.fillText(plan.summary.duration_label, 20, 92)
+      ctx.font = '12px sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'
+      ctx.fillText(ellipsize(plan.summary.theme_tags.join(' · ') || 'AI 定制行程', 240, '12px sans-serif'), 20, 122)
+      // 海鸥标记
+      ctx.font = '34px sans-serif'
+      ctx.fillText('🕊️', 238, 60)
+
+      // 行程亮点
+      ctx.fillStyle = '#111111'
+      ctx.font = 'bold 15px sans-serif'
+      ctx.fillText('行程亮点', 20, 200)
+      ctx.font = '12px sans-serif'
+      ctx.fillStyle = '#444444'
+      plan.daily_plans.slice(0, 5).forEach((d, i) => {
+        ctx.fillText(ellipsize(`Day${d.day} · ${d.theme}`, 250, '12px sans-serif'), 20, 228 + i * 26)
+      })
+
+      // 预算
+      ctx.font = 'bold 14px sans-serif'
+      ctx.fillStyle = '#2E7CF6'
+      ctx.fillText(`人均预算 ¥${perPerson.toLocaleString()}`, 20, 376)
+
+      // 底部分隔线
+      ctx.strokeStyle = '#EEEEEE'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(20, 400)
+      ctx.lineTo(280, 400)
+      ctx.stroke()
+
+      // 底部品牌 + 小程序码
+      ctx.fillStyle = '#111111'
+      ctx.font = 'bold 14px sans-serif'
+      ctx.fillText('鸥途 · AI 旅行助手', 20, 428)
+      ctx.font = '11px sans-serif'
+      ctx.fillStyle = '#999999'
+      ctx.fillText(qrPath ? '长按识别小程序码，规划同款行程' : '微信搜索「鸥途」小程序，规划同款行程', 20, 452)
+
+      if (qrPath) {
+        const img = node.createImage()
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve()
+          img.onerror = reject
+          img.src = qrPath
+        })
+        ctx.drawImage(img, 216, 408, 64, 64)
+      }
+
+      // 3) 导出图片
+      const out = await new Promise<string>((resolve, reject) => {
+        Taro.canvasToTempFilePath({
+          canvas: node,
+          success: (r) => resolve(r.tempFilePath),
+          fail: reject
+        } as any)
+      })
+      setPosterUrl(out)
+      setPosterOpen(true)
+    } catch (e: any) {
+      Taro.showToast({ title: '海报生成失败，请重试', icon: 'none' })
+    } finally {
+      setPosterLoading(false)
+    }
   }
 
   const perPerson = plan.budget_breakdown.total_estimated
@@ -352,7 +488,26 @@ export default function Preview() {
           </View>
         </View>
         <Button className='share-btn' openType='share' hoverClass='share-btn-hover'>分享给伙伴 ›</Button>
+        <View className='poster-btn' onClick={makePoster}>
+          <Text className='poster-btn-text'>{posterLoading ? '海报生成中…' : '🎨 生成分享海报'}</Text>
+        </View>
       </View>
+
+      {/* 海报弹层：长按可保存或发送给朋友 */}
+      {posterOpen && (
+        <View className='poster-mask' onClick={() => setPosterOpen(false)}>
+          <View className='poster-modal' onClick={(e) => e.stopPropagation()}>
+            <Image className='poster-img' src={posterUrl} mode='widthFix' showMenuByLongpress />
+            <Text className='poster-hint'>长按图片，保存或发送给朋友</Text>
+            <View className='poster-close' onClick={() => setPosterOpen(false)}>
+              <Text className='poster-close-text'>关闭</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* 隐藏的海报画布 */}
+      <Canvas type='2d' id='posterCv' className='poster-canvas' />
     </View>
   )
 }
