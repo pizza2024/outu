@@ -1,5 +1,5 @@
 import { View, Text, Image, Button, Input } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { useState } from 'react'
 import { getHistory, getUser, saveUser } from '../../store/plan'
 import { apiPost } from '../../utils/api'
@@ -15,6 +15,15 @@ export default function Profile() {
     setUser(getUser())
     setTripCount(getHistory().length)
   })
+
+  /** 转发 / 朋友圈分享 */
+  useShareAppMessage(() => ({
+    title: '鸥途 · AI 旅行助手，填一份问卷就能生成完整旅行方案',
+    path: '/pages/launch/launch'
+  }))
+  useShareTimeline(() => ({
+    title: '鸥途 · AI 旅行助手，不懂 AI 也能拥有完美旅行'
+  }))
 
   /** 微信头像选择（chooseAvatar 按钮回调，拿到临时头像路径） */
   const onChooseAvatar = (e: any) => {
