@@ -1,5 +1,5 @@
 import { View, Text, ITouchEvent } from '@tarojs/components'
-import Taro, { useDidHide, useDidShow } from '@tarojs/taro'
+import Taro, { useDidHide, useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { useRef, useState } from 'react'
 import { deleteHistory, getHistory, pushHistory, savePlan } from '../../store/plan'
 import { GenTask, getTasks, removeTask, updateTask } from '../../store/task'
@@ -64,6 +64,15 @@ export default function Trips() {
     pollTasks()
     pollTimer.current = setInterval(pollTasks, 5000)
   })
+
+  /** 转发给好友 / 分享到朋友圈 */
+  useShareAppMessage(() => ({
+    title: '鸥途 · AI 旅行助手，填一份问卷就能生成完整旅行方案',
+    path: '/pages/launch/launch'
+  }))
+  useShareTimeline(() => ({
+    title: '鸥途 · AI 旅行助手，不懂 AI 也能拥有完美旅行'
+  }))
 
   useDidHide(() => {
     if (pollTimer.current) {

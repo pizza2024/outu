@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Input, Button, Image } from '@tarojs/components'
-import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { useRef, useState } from 'react'
 import { getPlan, getTodoDone, recalcBudget, savePlan, toggleTodoDone } from '../../store/plan'
 import { ScheduleItem, TodoItem, TravelPlan } from '../../types'
@@ -57,6 +57,11 @@ export default function Preview() {
   useShareAppMessage(() => ({
     title: plan ? `我的${plan.summary.destination_label}旅行方案，鸥途帮我规划好了` : '鸥途 · AI 旅行助手',
     path: '/pages/launch/launch'
+  }))
+  useShareTimeline(() => ({
+    title: plan
+      ? `${plan.summary.destination_label}${plan.summary.duration_label}旅行方案 · 鸥途 AI 规划`
+      : '鸥途 · AI 旅行助手'
   }))
 
   if (!plan) {

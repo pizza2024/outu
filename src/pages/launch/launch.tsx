@@ -1,5 +1,5 @@
 import { View, Text, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { useEffect, useState } from 'react'
 import { IS_DEV } from '../../config'
 import { getUser, saveUser, uuid } from '../../store/plan'
@@ -27,6 +27,15 @@ export default function Launch() {
       setChecking(false)
     }
   }, [])
+
+  /** 启动页也允许转发/朋友圈，分享入口页可被再次分享 */
+  useShareAppMessage(() => ({
+    title: '鸥途 · AI 旅行助手，填一份问卷就能生成完整旅行方案',
+    path: '/pages/launch/launch'
+  }))
+  useShareTimeline(() => ({
+    title: '鸥途 · AI 旅行助手，不懂 AI 也能拥有完美旅行'
+  }))
 
   const enter = () => {
     Taro.reLaunch({ url: '/pages/trips/trips' })
